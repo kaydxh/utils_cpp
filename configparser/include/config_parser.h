@@ -38,6 +38,7 @@ class FilePraser {
   void trimRight(std::string &str, char c = ' ');
   bool isComment(const std::string &str);
   std::shared_ptr<Section> getSection(const std::string &section_name);
+  bool parser(const std::string &content, std::string &key, std::string &value);
 
  private:
   std::unordered_map<std::string, std::shared_ptr<section>> m_sections_;
