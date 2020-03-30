@@ -3,13 +3,14 @@
 //
 
 #include "config_parser.h"
+#include <string.h>
 
 namespace utils {
 namespace config {
-FilePraser::FilePraser() {}
-FilePraser::~FilePraser() {}
+FileParser::FileParser() {}
+FileParser::~FileParser() {}
 
-int FilePraser::Load(const std::string &file) {
+int FileParser::Load(const std::string &file) {
   FILE *fp = fopen(file.c_str(), "r");
   if (nullptr == fp) {
     return -1;
@@ -75,7 +76,7 @@ int FilePraser::Load(const std::string &file) {
     return 0;
   }
 
-  bool iFilePraser::isComment(std::string & str) {
+  bool FileParser::isComment(std::string & str) {
     if (str.length() == 0) {
       return true;
     } else if (str.length() > 0) {
@@ -85,6 +86,47 @@ int FilePraser::Load(const std::string &file) {
       return false;
     }
 
+    return false;
+  }
+  void FileParser::trim(std::string & str) {
+    trimRight(str);
+    trimLeft(str);
+  }
+
+  void FileParser::trimLeft(std::string & str, char c) {
+    int i = 0;
+    int len = str.length();
+    while (str[i] == c && str[i] != '\0') {
+      i++;
+    }
+    if (i != 0) {
+      str = str.substr(i, len - i);
+    }
+  }
+
+  void FileParser::trimRight(std::string & str, char c) {
+    int i = 0;
+    int len = str.length();
+    while (str[len - i - 1] == c && i >= 0) {
+      i++;
+    }
+    if (i != 0) {
+      str = str.substr(0, i + 1);
+    }
+  }
+
+  bool FileParser::parser(const std::string &content, std::string &key,
+                          std::string &value) {
+    int i = 0;
+    int len = content.length();
+    while (i < len && content[i] != '=') {
+      i++;
+    }
+    if (i > 0 && i < len - 1) {
+      key = content.substr(0, i);
+      value = content.substr(i + 1);
+      return true;
+    }
     return false;
   }
 }  // namespace config

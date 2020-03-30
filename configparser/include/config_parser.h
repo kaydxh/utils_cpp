@@ -7,6 +7,7 @@
 #include <memory>
 #include <string>
 #include <unordered_map>
+#include <vector>
 
 namespace utils {
 namespace config {
@@ -20,17 +21,17 @@ struct Section {
   std::vector<Item> items;
 };
 
-template <typename T>
-class FilePraser {
+// template <typename T>
+class FileParser {
  public:
-  FilePraser();
-  ~FilePraser();
+  FileParser();
+  ~FileParser();
 
  public:
-  using std::unordered_map<std::string, section *>::iterator = iterator;
+  //  using std::unordered_map<std::string, section *>::iterator = iterator;
   int Load(const std::string &file);
   void GetSections(std::vector<std::string> &section_names);
-  T GetItem(const std::string &key, std::string &default_value = "");
+  // T GetItem(const std::string &key, std::string &default_value = "");
 
  private:
   void trim(std::string &str);
@@ -41,7 +42,7 @@ class FilePraser {
   bool parser(const std::string &content, std::string &key, std::string &value);
 
  private:
-  std::unordered_map<std::string, std::shared_ptr<section>> m_sections_;
+  std::unordered_map<std::string, std::shared_ptr<Section>> m_sections_;
 };
 }  // namespace config
 }  // namespace utils
