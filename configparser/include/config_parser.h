@@ -34,6 +34,7 @@ class FileParser {
   // T GetItem(const std::string &key, std::string &default_value = "");
 
  private:
+  int getline(std::string &str, FILE *fp);
   void trim(std::string &str);
   void trimLeft(std::string &str, char c = ' ');
   void trimRight(std::string &str, char c = ' ');

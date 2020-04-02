@@ -7,6 +7,7 @@
 
 namespace utils {
 namespace config {
+const int kInitBufSize = 2048;
 FileParser::FileParser() {}
 FileParser::~FileParser() {}
 
@@ -29,7 +30,7 @@ int FileParser::Load(const std::string &file) {
       line = subline;
     }
 
-    trime(line);
+    trim(line);
     if (line.length() <= 0) {
       continue;
     }
@@ -48,17 +49,17 @@ int FileParser::Load(const std::string &file) {
       std::string s(line, 1, len);
 
       if (getSection(s.c_str()) != nullptr) {
-        fclose();
+        fclose(fp);
         return -1;
       }
 
-      section->reset(new Section());
+      section.reset(new Section());
       if (nullptr == section) {
-        fclose();
+        fclose(fp);
         return -1;
       }
       section->name = s;
-      m_sections_[s] = sections;
+      m_sections_[s] = section;
     } else {
       std::string key;
       std::string value;
@@ -72,62 +73,101 @@ int FileParser::Load(const std::string &file) {
         return -1;
       }
     }
-
-    return 0;
   }
 
-  bool FileParser::isComment(std::string & str) {
-    if (str.length() == 0) {
-      return true;
-    } else if (str.length() > 0) {
-      if (str[0] == '#') {
-        return true;
+  return 0;
+}
+
+int getline(std::string &str, FILE *fp) {
+  int plen = 0;
+  int buf_size = kInitBufSize * sizeof(char);
+  char *buf = reinterpret_cast<char *>(malloc(buf_size));
+  char *pbuf = nullptr;
+  char *p = buf;
+  if (buf == nullptr) {
+    exit(-1);
+  }
+  memset(buf, 0, buf_size);
+  int total_size = buf_size;
+
+  while (fgets(p, buf_size, fp) != nullptr) {
+    plen = strlen(p);
+
+    if (plen > 0 && p[plen - 1] != '\n' && !feof(fp)) {
+      total_size = strlen(buf) + buf_size;
+      pbuf = reinterpret_cast<char *>(realloc(buf, total_size));
+      if (pbuf == nullptr) {
+        free(pbuf);
+
+        exit(-1);
       }
-      return false;
-    }
 
-    return false;
-  }
-  void FileParser::trim(std::string & str) {
-    trimRight(str);
-    trimLeft(str);
-  }
+      buf = pbuf;
+      p = buf + strlen(buf);
+      continue;
 
-  void FileParser::trimLeft(std::string & str, char c) {
-    int i = 0;
-    int len = str.length();
-    while (str[i] == c && str[i] != '\0') {
-      i++;
-    }
-    if (i != 0) {
-      str = str.substr(i, len - i);
+    } else {
+      break;
     }
   }
+  str = buf;
+  free(buf);
+  buf = nullptr;
+  return str.length();
+}
 
-  void FileParser::trimRight(std::string & str, char c) {
-    int i = 0;
-    int len = str.length();
-    while (str[len - i - 1] == c && i >= 0) {
-      i++;
-    }
-    if (i != 0) {
-      str = str.substr(0, i + 1);
-    }
-  }
-
-  bool FileParser::parser(const std::string &content, std::string &key,
-                          std::string &value) {
-    int i = 0;
-    int len = content.length();
-    while (i < len && content[i] != '=') {
-      i++;
-    }
-    if (i > 0 && i < len - 1) {
-      key = content.substr(0, i);
-      value = content.substr(i + 1);
+bool FileParser::isComment(const std::string &str) {
+  if (str.length() == 0) {
+    return true;
+  } else if (str.length() > 0) {
+    if (str[0] == '#') {
       return true;
     }
     return false;
   }
+
+  return false;
+}
+void FileParser::trim(std::string &str) {
+  trimRight(str);
+  trimLeft(str);
+}
+
+void FileParser::trimLeft(std::string &str, char c) {
+  int i = 0;
+  int len = str.length();
+  while (str[i] == c && str[i] != '\0') {
+    i++;
+  }
+  if (i != 0) {
+    str = str.substr(i, len - i);
+  }
+}
+
+void FileParser::trimRight(std::string &str, char c) {
+  int i = 0;
+  int len = str.length();
+  while (str[len - i - 1] == c && i >= 0) {
+    i++;
+  }
+  if (i != 0) {
+    str = str.substr(0, i + 1);
+  }
+}
+
+bool FileParser::parser(const std::string &content, std::string &key,
+                        std::string &value) {
+  int i = 0;
+  int len = content.length();
+  while (i < len && content[i] != '=') {
+    i++;
+  }
+  if (i > 0 && i < len - 1) {
+    key = content.substr(0, i);
+    value = content.substr(i + 1);
+    return true;
+  }
+  return false;
+}
 }  // namespace config
-}  // namespace config
+}  // namespace utils
