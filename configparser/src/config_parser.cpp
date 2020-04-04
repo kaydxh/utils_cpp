@@ -78,7 +78,24 @@ int FileParser::Load(const std::string &file) {
   return 0;
 }
 
-int getline(std::string &str, FILE *fp) {
+int FileParser::getValue(const std::string &section_name,
+                         const std::string &key, std::string &value) {
+  auto spSection = getSection(section_name);
+  if (spSection == nullptr) {
+    return -1;
+  }
+
+  for (auto it = spSection->items.begin(); it != spSection->items.end(); ++it) {
+    if (it->key == key) {
+      value = it->value;
+      return 0;
+    }
+  }
+
+  return -1;
+}
+
+int FileParser::getline(std::string &str, FILE *fp) {
   int plen = 0;
   int buf_size = kInitBufSize * sizeof(char);
   char *buf = reinterpret_cast<char *>(malloc(buf_size));
@@ -168,6 +185,15 @@ bool FileParser::parser(const std::string &content, std::string &key,
     return true;
   }
   return false;
+}
+std::shared_ptr<Section> FileParser::getSection(
+    const std::string &section_name) {
+  auto it = m_sections_.find(section_name);
+  if (it != m_sections_.end()) {
+    return it->second;
+  }
+
+  return nullptr;
 }
 }  // namespace config
 }  // namespace utils

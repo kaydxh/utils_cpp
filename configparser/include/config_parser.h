@@ -30,6 +30,8 @@ class FileParser {
  public:
   //  using std::unordered_map<std::string, section *>::iterator = iterator;
   int Load(const std::string &file);
+  int getValue(const std::string &section_name, const std::string &key,
+               std::string &value);
   void GetSections(std::vector<std::string> &section_names);
   // T GetItem(const std::string &key, std::string &default_value = "");
 
