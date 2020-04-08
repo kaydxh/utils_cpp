@@ -35,7 +35,7 @@ int FileParser::Load(const std::string &file) {
       continue;
     }
 
-    if (line[0] = '[') {
+    if (line[0] == '[') {
       int index = line.find_first_of(']');
       if (-1 == index) {
         fclose(fp);
@@ -168,7 +168,7 @@ void FileParser::trimRight(std::string &str, char c) {
     i++;
   }
   if (i != 0) {
-    str = str.substr(0, i + 1);
+    str = str.substr(0, len - i);
   }
 }
 

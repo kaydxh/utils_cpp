@@ -15,8 +15,11 @@ int main() {
     return -1;
   }
   std::string value;
+  std::string port;
   file_parser.getValue("app1", "addr", value);
+  file_parser.getValue("app2", "port", port);
   std::cout << "value:" << value << std::endl;
+  std::cout << "port:" << port << std::endl;
 
   return 0;
 }
