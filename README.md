@@ -3,12 +3,15 @@ common tool for cpp
 
 ## 1 configparser
 > configparser can prase the config file which is toml format.
+```
+# config file
 [app1]
 addr=127.0.0.1
 port=8001
 [app2]
 addr=127.0.0.2
 port=8002
+```
 
 ### 1.1 usage
 ```
