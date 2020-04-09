@@ -6,7 +6,7 @@
 #include "config_parser.h"
 
 int main() {
-  std::string file = "./conf/config.yaml";
+  std::string file = "./conf/config.toml";
   std::string section_name = "app";
   utils::config::FileParser file_parser;
   int ret = file_parser.Load(file);
