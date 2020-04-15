@@ -60,7 +60,7 @@ std::string MD5::Md5SumString(const std::string &str) {
   return hexdigest(digest);
 }
 
-void MD5::update(Context *ctx, const unsigned char *input, size_t length) {
+void MD5::update(Context *ctx, const unsigned char input[], size_t length) {
   // compute number of bytes mod 64
   size_t index = ctx->count[0] / 8 % blocksize;
 
@@ -81,7 +81,7 @@ void MD5::update(Context *ctx, const unsigned char *input, size_t length) {
 
     // transform chunks of blocksize (64 bytes)
     for (i = firstpart; i + blocksize <= length; i += blocksize)
-      transform(ctx->state, input[i]);
+      transform(ctx->state, &input[i]);
 
     index = 0;
   } else
@@ -91,7 +91,7 @@ void MD5::update(Context *ctx, const unsigned char *input, size_t length) {
   memcpy(&ctx->buffer[index], &input[i], length - i);
 }
 
-void MD5::update(Context *ctx, const char *input, size_t length) {
+void MD5::update(Context *ctx, const char input[], size_t length) {
   update(ctx, reinterpret_cast<const unsigned char *>(input), length);
 }
 
@@ -138,7 +138,7 @@ void MD5::decode(uint32_t output[], const unsigned char input[], size_t len) {
                 (((uint32_t)input[j + 3]) << 24);
 }
 
-void MD5::transform(uint32_t state[4], const unsigned char block[blocksize]) {
+void MD5::transform(uint32_t state[4], const unsigned char block[]) {
   uint32_t a = state[0], b = state[1], c = state[2], d = state[3], x[16];
   decode(x, block, blocksize);
 
@@ -223,24 +223,22 @@ void MD5::transform(uint32_t state[4], const unsigned char block[blocksize]) {
   memset(x, 0, sizeof x);
 }
 // F, G, H and I are basic MD5 functions.
-inline MD5::uint32_t MD5::F(uint32_t x, uint32_t y, uint32_t z) {
+inline uint32_t MD5::F(uint32_t x, uint32_t y, uint32_t z) {
   return (x & y) | (~x & z);
 }
 
-inline MD5::uint32_t MD5::G(uint32_t x, uint32_t y, uint32_t z) {
+inline uint32_t MD5::G(uint32_t x, uint32_t y, uint32_t z) {
   return (x & z) | (y & ~z);
 }
 
-inline MD5::uint32_t MD5::H(uint32_t x, uint32_t y, uint32_t z) {
-  return x ^ y ^ z;
-}
+inline uint32_t MD5::H(uint32_t x, uint32_t y, uint32_t z) { return x ^ y ^ z; }
 
-inline MD5::uint32_t MD5::I(uint32_t x, uint32_t y, uint32_t z) {
+inline uint32_t MD5::I(uint32_t x, uint32_t y, uint32_t z) {
   return y ^ (x | ~z);
 }
 
 // rotate_left rotates x left n bits.
-inline MD5::uint32_t MD5::rotate_left(uint32_t x, int n) {
+inline uint32_t MD5::rotate_left(uint32_t x, int n) {
   return (x << n) | (x >> (32 - n));
 }
 

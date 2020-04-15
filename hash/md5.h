@@ -31,18 +31,18 @@ class MD5 {
 
  public:
   std::string Md5SumString(const std::string &str);
-  std::string md5Sum(const std::string &str, MD5Digest &digest);
+  void md5Sum(const std::string &str, MD5Digest &digest);
 
  public:
   static const int32_t blocksize = 64;
 
  private:
   void init(Context *ctx);
-  void update(Context *ctx, const unsigned char *input, size_t length);
-  void update(Context *ctx, const char *input, size_t length);
+  void update(Context *ctx, const unsigned char input[], size_t length);
+  void update(Context *ctx, const char input[], size_t length);
   void finalize(Context *ctx, MD5Digest *digest);
-  void transform(uint32_t state[4], const unsigned char block[blocksize]);
-  void encode(unsigned output[], const uint32_t input[], size_t len);
+  void transform(uint32_t state[4], const unsigned char block[]);
+  void encode(unsigned char output[], const uint32_t input[], size_t len);
   void decode(uint32_t output[], const unsigned char input[], size_t len);
   std::string hexdigest(const MD5Digest &digest) const;
 
