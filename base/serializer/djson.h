@@ -8,7 +8,7 @@
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
 
-#include "djson/obj.hpp"
+#include "obj.hpp"
 
 KINGFISHER_NAMESPACE_BEGIN
 SERIALIZER_DJSON_NAMESPACE_BEGIN
