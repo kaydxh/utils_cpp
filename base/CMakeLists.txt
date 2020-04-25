@@ -8,4 +8,5 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/configparser)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/hash)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/serializer)
 
-add_library(kingfish_base ${base_SRC})
+add_library(kingfisher_base ${base_SRC})
+install(TARGETS kingfisher_base DESTINATION lib)

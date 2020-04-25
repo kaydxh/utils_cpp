@@ -1,0 +1,8 @@
+cmake_minimum_required (VERSION 2.8.1)
+
+set (TARGET_NAME kingfisher_base_test)
+
+aux_source_directory (. SRCS)
+add_executable (${TARGET_NAME} ${SRCS})
+add_definitions ("-std=c++0x -Wno-deprecated -D_GLIBCXX_USE_NANOSLEEP")
+target_link_libraries (${TARGET_NAME} kingfisher_base gtest pthread)

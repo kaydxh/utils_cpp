@@ -9,14 +9,14 @@
 #include <condition_variable>
 #include <deque>
 #include <mutex>
-#include "core/noncopyable.cpp"
+#include "core/noncopyable.hpp"
 
 namespace kingfisher {
 namespace thread {
 
 template <typename T>
 class BlockingQueue : noncopyable {
-  using std::lock_guard<std::mutex> LockGuard;
+  using LockGuard = std::lock_guard<std::mutex>;
 
  public:
   BlockingQueue() : mutex_(), cond_(), queue_() {}
@@ -35,16 +35,16 @@ class BlockingQueue : noncopyable {
     cond_.notify_one();
   }
 
-  T Task() {
+  T Take() {
     std::unique_lock<std::mutex> lock(mutex_);
     while (queue_.empty()) {
       cond_.wait(lock, [this] { return !queue_.empty(); });
-      assert(!queue_.empty());
-      T front(std::move(queue_.front()));
-      queue_.pop_front();
-
-      return front;
     }
+    assert(!queue_.empty());
+    T front(std::move(queue_.front()));
+    queue_.pop_front();
+
+    return front;
   }
 
   size_t Size() const {
