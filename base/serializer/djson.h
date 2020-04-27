@@ -56,7 +56,7 @@ class JsonHelper {
 
     os << "{";
     auto& detailObj = oit->second;
-    auto dit = detailObj.begin();
+    // auto dit = detailObj.begin();
 
     bool firsted = false;
     for (auto& e : detailObj) {
@@ -86,7 +86,7 @@ class JsonHelper {
     }
 
     auto& detailObj = oit->second;
-    auto dit = detailObj.begin();
+    // auto dit = detailObj.begin();
 
     for (auto& e : detailObj) {
       if (!rjson.HasMember(e.first.c_str())) {

@@ -36,7 +36,7 @@ class Singleton : kingfisher::noncopyable {
       return *value_;
 
     } catch (...) {
-      return nullptr;
+      exit(-1);
     }
   }
 
