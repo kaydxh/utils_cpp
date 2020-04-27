@@ -3,11 +3,13 @@
 
 #include <iostream>
 #include <sstream>
+#include <string>
 #include <typeinfo>
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
 #include "rapidjson/writer.h"
 
+#include "core/singleton.hpp"
 #include "obj.hpp"
 
 KINGFISHER_NAMESPACE_BEGIN
@@ -47,7 +49,8 @@ class JsonHelper {
  public:
   static void toJson(std::ostream& os, const T& t) {
     OBJCITER oit;
-    if (!Singleton<JsonObjsManager>::instance().find(oit, typeid(t).name())) {
+    if (!kingfisher::core::Singleton<JsonObjsManager>::Instance().find(
+            oit, typeid(t).name())) {
       return;
     }
 
@@ -77,7 +80,8 @@ class JsonHelper {
     }
 
     OBJCITER oit;
-    if (!Singleton<JsonObjsManager>::instance().find(oit, typeid(t).name())) {
+    if (!kingfisher::core::Singleton<JsonObjsManager>::Instance().find(
+            oit, typeid(t).name())) {
       return false;
     }
 

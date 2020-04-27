@@ -32,13 +32,14 @@
 KINGFISHER_NAMESPACE_BEGIN
 SERIALIZER_DJSON_NAMESPACE_BEGIN
 
+class JsonBase;
+
+#if 0
 #define SAFE_DELETE(x) \
   do {                 \
     if (x) delete x;   \
     x = nullptr;       \
   } while (0)
-
-class JsonBase;
 
 #if 0
 template <class T>
@@ -125,6 +126,7 @@ std::once_flag Singleton<T>::once_;
 
 template <typename T>
 T* Singleton<T>::value_ = nullptr;
+#endif
 
 using OBJDETAIL = std::vector<std::pair<std::string, JsonBase*> >;
 using OBJCITER = std::map<std::string, OBJDETAIL>::const_iterator;
