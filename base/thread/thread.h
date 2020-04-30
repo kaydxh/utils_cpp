@@ -19,6 +19,8 @@ class Thread : noncopyable {
   explicit Thread(ThreadFunc);
   ~Thread();
 
+  void join();
+
  private:
   void run();
 

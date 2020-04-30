@@ -22,34 +22,11 @@ void ThreadPool::start() {
   }
 }
 
-template <typename F, typename... Args>
-auto ThreadPool::AddTask(F &&f, Args &&... args)
-    -> std::future<typename std::result_of<F(Args...)>::type> {
-  using return_type = typename std::result_of<F(Args...)>::type;
-  auto task = std::make_shared<std::packaged_task<return_type()> >(
-      std::bind(std::forward<F>(f), std::forward<Args>(args)...));
-
-  std::future<return_type> res = task->get_future();
-  {
-    std::unique_lock<std::mutex> lock(mutex_);
-    tasks_.emplace([task]() { (*task)(); });
-  }
-  condition_.notify_one();
-
-  return res;
-}
-
 ThreadPool::Task ThreadPool::take() {
   std::unique_lock<std::mutex> lock(mutex_);
   condition_.wait(lock, [this] { return !running_ || !tasks_.empty(); });
 
   Task task;
-  if (task) {
-    std::cout << "task init" << std::endl;
-  } else {
-    std::cout << "task empty" << std::endl;
-  }
-
   if (!running_) {
     return task;
   }
@@ -69,5 +46,20 @@ void ThreadPool::loopInThread() {
     }
   }
 }
+
+void ThreadPool::stop() {
+  {
+    std::unique_lock<std::mutex> lock(mutex_);
+    running_ = false;
+    condition_.notify_all();
+  }
+
+  std::cout << "start join" << std::endl;
+  for (auto &thr : threads_) {
+    thr->join();
+  }
+  std::cout << "end finish" << std::endl;
+}
+
 }  // namespace thread
 }  // namespace kingfisher

@@ -8,7 +8,11 @@ namespace thread {
 Thread::Thread(ThreadFunc func)
     : thread_(std::bind(&Thread::run, this)), func_(func) {}
 
-Thread::~Thread() { thread_.join(); }
+Thread::~Thread() {
+  if (thread_.joinable()) {
+    thread_.join();
+  }
+}
 
 void Thread::run() {
   if (nullptr == func_) {
@@ -25,6 +29,12 @@ void Thread::run() {
 
   std::cout << "finish task" << std::endl;
   return;
+}
+
+void Thread::join() {
+  if (thread_.joinable()) {
+    thread_.join();
+  }
 }
 }  // namespace thread
 }  // namespace kingfisher
