@@ -4,6 +4,7 @@ set (
   hash/md5.cpp
   serializer/djson.cpp
   thread/thread.cc
+  thread/thread_pool.cc
   )
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/configparser)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/hash)
