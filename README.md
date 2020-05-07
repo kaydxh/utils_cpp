@@ -1,5 +1,5 @@
 # kingfinsher
-common tool for cpp
+kingfinsher is a C++ based library
 
 ## 1 configparser
 > configparser can prase the config file which is toml format.
@@ -29,4 +29,12 @@ port=8002
   file_parser.getValue("app2", "port", port);
   std::cout << "value:" << value << std::endl;
   std::cout << "port:" << port << std::endl;
+```
+
+## 2 hash
+> It can easily get hash value for string
+```
+  string str = "abc";
+  auto hash = kingfisher::hash::Md5SumString(str);
+  std::cout << hash << std::endl;
 ```
