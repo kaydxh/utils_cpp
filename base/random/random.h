@@ -5,11 +5,30 @@
 #ifndef SERIALIZER_BASE_RANDOM_RANDOM_H_
 #define SERIALIZER_BASE_RANDOM_RANDOM_H_
 
+#include <chrono>
+#include <memory>
 #include <random>
 #include <type_traits>
 
 namespace kingfisher {
 namespace random {
+
+class DefaultGenerator {
+ public:
+  DefaultGenerator() {
+    unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+    m_sp_rand_num.reset(new std::mt19937(seed));
+  }
+  ~DefaultGenerator() {}
+
+  uint32_t operator()() {
+    return m_sp_rand_num->operator()();
+    ;
+  }
+
+ private:
+  std::shared_ptr<std::mt19937> m_sp_rand_num;
+};
 
 class Random {
  private:
@@ -20,9 +39,14 @@ class Random {
                               RandomNumberGenerator>::type;
 
  public:
-  using DefaultGenerator = std::mt19937;
+  // using DefaultGenerator = std::mt19937;
 
-  static inline uint32_t RandomNumberSeed() { return RandUInt32(); }
+  static inline uint32_t RandomNumberSeed() {
+    // unsigned seed =
+    // std::chrono::system_clock::now().time_since_epoch().count();
+    // std::mt19937 rand_num(seed);
+    return RandUInt32();
+  }
 
   template <typename RandomNumberGenerator = DefaultGenerator>
   static void Seed(ValidRNG<RandomNumberGenerator>& rng);
