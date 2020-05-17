@@ -21,10 +21,16 @@ class DefaultGenerator {
   }
   ~DefaultGenerator() {}
 
-  uint32_t operator()() {
-    return m_sp_rand_num->operator()();
-    ;
+  using result_type = uint32_t;
+
+  static inline constexpr result_type min() {
+    return std::numeric_limits<result_type>::min();
   }
+
+  static inline constexpr result_type max() {
+    return std::numeric_limits<result_type>::max();
+  }
+  uint32_t operator()() { return m_sp_rand_num->operator()(); }
 
  private:
   std::shared_ptr<std::mt19937> m_sp_rand_num;
