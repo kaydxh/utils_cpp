@@ -9,7 +9,11 @@ namespace kingfisher {
 namespace thread {
 
 ThreadPool::ThreadPool(int threads_number)
-    : mutex_(), condition_(), tasks_(), threads_number_(threads_number) {}
+    : mutex_(),
+      condition_(),
+      tasks_(),
+      tasks_remaining_(0),
+      threads_number_(threads_number) {}
 
 ThreadPool::~ThreadPool() {}
 
@@ -43,6 +47,12 @@ void ThreadPool::loopInThread() {
     Task task(take());
     if (task) {
       task();
+      std::cout << "--" << tasks_remaining_ << std::endl;
+      if (0 == --tasks_remaining_) {
+        std::unique_lock<std::mutex> lock(mutex_);
+        std::cout << "-------" << tasks_remaining_ << std::endl;
+        condition_.notify_all();
+      }
     }
   }
 }
@@ -61,5 +71,13 @@ void ThreadPool::stop() {
   std::cout << "end finish" << std::endl;
 }
 
+void ThreadPool::join() {
+  std::unique_lock<std::mutex> lock(mutex_);
+  while (tasks_remaining_) {
+    std::cout << "AA" << std::endl;
+    condition_.wait(lock);
+    std::cout << "BB" << std::endl;
+  }
+}
 }  // namespace thread
 }  // namespace kingfisher

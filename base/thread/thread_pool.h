@@ -5,9 +5,11 @@
 #ifndef BASE_THREAD_POOL_THREAD_H_
 #define BASE_THREAD_POOL_THREAD_H_
 
+#include <atomic>
 #include <condition_variable>
 #include <deque>
 #include <future>
+#include <iostream>
 #include <mutex>
 #include <vector>
 #include "thread.h"
@@ -35,6 +37,8 @@ class ThreadPool : noncopyable {
     {
       std::unique_lock<std::mutex> lock(mutex_);
       tasks_.emplace_back([task]() { (*task)(); });
+      ++tasks_remaining_;
+      std::cout << tasks_remaining_ << std::endl;
     }
     condition_.notify_one();
 
@@ -44,12 +48,15 @@ class ThreadPool : noncopyable {
   Task take();
   void loopInThread();
   void stop();
+  void join();
+  int tasksRemaining() { return tasks_remaining_; }
 
  private:
   mutable std::mutex mutex_;
   std::condition_variable condition_;
   std::deque<Task> tasks_;
   std::vector<std::unique_ptr<Thread>> threads_;
+  std::atomic<int> tasks_remaining_;
 
   int threads_number_;
   bool running_ = false;

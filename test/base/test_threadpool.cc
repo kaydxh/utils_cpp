@@ -24,21 +24,40 @@ class Worker {
   void task(int a, int b) {
     a += b;
     std::cout << "do worker task add result= " << a << std::endl;
-    // return a;
   }
 };
 
 TEST(test_ThreadPool, theadpool) {
-  ThreadPool pool(4);
-  pool.start();
-  pool.AddTask(taskAdd, 2, 3);
+#if 0
+  {
+    ThreadPool pool(4);
+    pool.start();
+    pool.AddTask(taskAdd, 2, 3);
 
-  std::function<void()> taskAdd_2 = std::bind(taskAdd, 29, 3);
-  pool.AddTask(taskAdd_2);
+    std::function<void()> taskAdd_2 = std::bind(taskAdd, 29, 3);
+    pool.AddTask(taskAdd_2);
 
-  Worker w;
-  pool.AddTask(&Worker::task, &w, 2, 3);
-  pool.stop();
+    Worker w;
+    pool.AddTask(&Worker::task, &w, 2, 3);
+    pool.stop();
+  }
+
+#endif
+  {
+    ThreadPool pool(4);
+    pool.start();
+    pool.AddTask(taskAdd, 4, 3);
+
+    std::function<void()> taskAdd_2 = std::bind(taskAdd, 29, 3);
+    pool.AddTask(taskAdd_2);
+
+    Worker w;
+    pool.AddTask(&Worker::task, &w, 2, 3);
+    pool.AddTask(&Worker::task, &w, 2, 3);
+    pool.stop();
+    //  pool.join();
+    // EXPECT_EQ(pool.tasksRemaining(), 0);
+  }
   // ThreadPool::Task func = std::move([]() { taskAdd(2, 3); });
   // pool.AddTask(func);
 
