@@ -30,7 +30,7 @@ ThreadPool::Task ThreadPool::take() {
   std::unique_lock<std::mutex> lock(mutex_);
   condition_.wait(lock, [this] { return !running_ || !tasks_.empty(); });
 
-  Task task;
+  Task task = nullptr;
   if (!running_) {
     return task;
   }
@@ -47,10 +47,8 @@ void ThreadPool::loopInThread() {
     Task task(take());
     if (task) {
       task();
-      std::cout << "--" << tasks_remaining_ << std::endl;
       if (0 == --tasks_remaining_) {
         std::unique_lock<std::mutex> lock(mutex_);
-        std::cout << "-------" << tasks_remaining_ << std::endl;
         condition_.notify_all();
       }
     }
@@ -64,20 +62,19 @@ void ThreadPool::stop() {
     condition_.notify_all();
   }
 
-  std::cout << "start join" << std::endl;
   for (auto &thr : threads_) {
     thr->join();
   }
-  std::cout << "end finish" << std::endl;
+  std::cout << "stop end, tasks_remaining_:" << tasks_remaining_ << std::endl;
 }
 
 void ThreadPool::join() {
   std::unique_lock<std::mutex> lock(mutex_);
   while (tasks_remaining_) {
-    std::cout << "AA" << std::endl;
     condition_.wait(lock);
-    std::cout << "BB" << std::endl;
   }
+  std::cout << "join end, tasks_remaining_:" << tasks_remaining_ << std::endl;
 }
+
 }  // namespace thread
 }  // namespace kingfisher

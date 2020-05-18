@@ -28,7 +28,6 @@ class Worker {
 };
 
 TEST(test_ThreadPool, theadpool) {
-#if 0
   {
     ThreadPool pool(4);
     pool.start();
@@ -42,7 +41,6 @@ TEST(test_ThreadPool, theadpool) {
     pool.stop();
   }
 
-#endif
   {
     ThreadPool pool(4);
     pool.start();
@@ -53,10 +51,9 @@ TEST(test_ThreadPool, theadpool) {
 
     Worker w;
     pool.AddTask(&Worker::task, &w, 2, 3);
-    pool.AddTask(&Worker::task, &w, 2, 3);
+    pool.join();
+    EXPECT_EQ(pool.tasksRemaining(), 0);
     pool.stop();
-    //  pool.join();
-    // EXPECT_EQ(pool.tasksRemaining(), 0);
   }
   // ThreadPool::Task func = std::move([]() { taskAdd(2, 3); });
   // pool.AddTask(func);

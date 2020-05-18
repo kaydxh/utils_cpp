@@ -6,7 +6,7 @@ namespace kingfisher {
 namespace thread {
 
 Thread::Thread(ThreadFunc func)
-    : thread_(std::bind(&Thread::run, this)), func_(func) {}
+    : func_(func), thread_(std::bind(&Thread::run, this)) {}
 
 Thread::~Thread() {
   if (thread_.joinable()) {

@@ -25,8 +25,8 @@ class Thread : noncopyable {
   void run();
 
  private:
+  ThreadFunc func_ = nullptr;
   std::thread thread_;
-  ThreadFunc func_;
 };
 }  // namespace thread
 }  // namespace kingfisher
