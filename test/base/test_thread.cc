@@ -16,7 +16,7 @@ class test_Thread : public testing::Test {
 
 void task() { std::cout << "do task" << std::endl; }
 TEST(test_Thread, thead) {
-  for (int i = 0; i < 1000; ++i) {
+  for (int i = 0; i < 1; ++i) {
     Thread t(task);
     t.join();
   }

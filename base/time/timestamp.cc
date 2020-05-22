@@ -1,10 +1,12 @@
 #include "timestamp.h"
-
-static_assert(sizeof(Timestamp) == sizeof(int64_t)),
-    "sizeof(Timestamp) must equal to sizeof(int64_t)");
+#include <stdio.h>
+#include <type_traits>  // for static_assert
 
 namespace kingfisher {
 namespace time {
+
+static_assert(sizeof(Timestamp) == sizeof(int64_t),
+              "sizeof(Timestamp) must equal to sizeof(int64_t)");
 
 Timestamp::Timestamp() : micro_seconds_since_epoch_(0) {}
 Timestamp::Timestamp(const Timestamp &rhs) {
@@ -22,7 +24,7 @@ std::string Timestamp::ToSecDotMicroString() const {
   char buf[32] = {0};
   int64_t seconds =
       static_cast<int64_t>(micro_seconds_since_epoch_ / kMicroSecondsPerSecond);
-  int64_t microseconds = micro_second_since_epoch_ % kMicroSecondsPerSecond;
+  int64_t microseconds = micro_seconds_since_epoch_ % kMicroSecondsPerSecond;
 
   int size = snprintf(buf, sizeof(buf) - 1, "%" PRId64 ".%06" PRId64 "",
                       seconds, microseconds);
@@ -37,7 +39,7 @@ std::string Timestamp::ToString() const {
   return std::string(buf, size);
 }
 
-std::string Timestamp::ToFormattedString(bool show_microseconds = true) const {
+std::string Timestamp::ToFormattedString(bool show_microseconds) const {
   char buf[64] = {0};
   time_t seconds =
       static_cast<time_t>(micro_seconds_since_epoch_ / kMicroSecondsPerSecond);
@@ -59,16 +61,16 @@ std::string Timestamp::ToFormattedString(bool show_microseconds = true) const {
 }
 
 Timestamp &Timestamp::operator=(const Timestamp &rhs) {
-  if (this != rhs) {
+  if (this != &rhs) {
     micro_seconds_since_epoch_ = rhs.micro_seconds_since_epoch_;
   }
 
   return *this;
 }
 
-Timestamp::Timestamp Now() {
+Timestamp Timestamp::Now() {
   struct timeval tv;
-  gettimeofday(&t, NULL);
+  gettimeofday(&tv, NULL);
   return Timestamp(tv.tv_sec * kMicroSecondsPerSecond + tv.tv_usec);
 }
 

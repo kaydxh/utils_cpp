@@ -5,6 +5,10 @@
 #ifndef SERIALIZER_BASE_TIME_TIMESTAMP_H_
 #define SERIALIZER_BASE_TIME_TIMESTAMP_H_
 
+#include <inttypes.h>
+#include <sys/time.h>
+#include <string>
+
 namespace kingfisher {
 namespace time {
 
@@ -49,7 +53,7 @@ inline bool operator<(const Timestamp &lhs, const Timestamp &rhs) {
   return lhs.MicroSecondsSinceEpoch() < rhs.MicroSecondsSinceEpoch();
 }
 
-inline bool operator=(const Timestamp &lhs, const Timestamp &rhs) {
+inline bool operator==(const Timestamp &lhs, const Timestamp &rhs) {
   return lhs.MicroSecondsSinceEpoch() == rhs.MicroSecondsSinceEpoch();
 }
 

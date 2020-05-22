@@ -5,6 +5,8 @@ set (
   serializer/djson.cpp
   thread/thread.cc
   thread/thread_pool.cc
+  time/timestamp.cc
+  utils/guid.cc
   )
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/configparser)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/hash)
