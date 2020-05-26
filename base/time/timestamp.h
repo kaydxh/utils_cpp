@@ -2,8 +2,8 @@
 // Created by kayxhding on 2020-05-21 15:34:47
 //
 
-#ifndef SERIALIZER_BASE_TIME_TIMESTAMP_H_
-#define SERIALIZER_BASE_TIME_TIMESTAMP_H_
+#ifndef KINGFISHER_BASE_TIME_TIMESTAMP_H_
+#define KINGFISHER_BASE_TIME_TIMESTAMP_H_
 
 #include <inttypes.h>
 #include <sys/time.h>
