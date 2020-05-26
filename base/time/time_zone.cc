@@ -45,5 +45,19 @@ inline void FillHMS(unsigned int seconds, struct tm *utc) {
   utc->tm_hour = static_cast<int>(minutes / 60);
 }
 
+const int kSecondsPerDay = 24 * 60 * 60;
+
+struct TimeZone::Data {
+  std::vector<Transition> transitions_;
+  std::vector<Localtime> localtimes_;
+  std::vector<std::string> names_;
+  std::string abbreviation_;
+};
+
+// zone file in the directory of /usr/share/zoneinfo/ etc. localtime
+// localtime -> /etc/localtime
+
+bool ReadTimeZoneFile(const char *zone_file, struct TimeZone::Data *data) {}
+
 }  // namespace time
 }  // namespace kingfisher
