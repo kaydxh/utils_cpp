@@ -1,14 +1,20 @@
 #include "time_zone.h"
+#include <assert.h>
+#include <string.h>
+#include <algorithm>
+#include <vector>
+#include "date.h"
+#include "file/file.h"
 
 namespace kingfisher {
 namespace time {
 
 struct Transition {
-  Transition(time_t gmt, time_t local, int index)
+  Transition(std::time_t gmt, std::time_t local, int index)
       : gmt_time_(gmt), localtime_(local), localtime_index_(index) {}
 
-  time_t gmt_time_;
-  time_t localtime_;
+  std::time_t gmt_time_;
+  std::time_t localtime_;
   int localtime_index_;
 };
 
@@ -30,10 +36,10 @@ struct Compare {
 };
 
 struct Localtime {
-  Localtime(time_t off_set, bool dst, int arrb)
+  Localtime(std::time_t off_set, bool dst, int arrb)
       : gmt_off_set_(off_set), is_dst_(dst), arrb_index_(arrb) {}
 
-  time_t gmt_off_set_;
+  std::time_t gmt_off_set_;
   bool is_dst_;
   int arrb_index_;
 };
@@ -59,13 +65,13 @@ struct TimeZone::Data {
 // you can query file data foramt with command "info tzfile" in linux platform
 
 bool ReadTimeZoneFile(const char *zone_file, struct TimeZone::Data *data) {
-  File f(zone_file);
+  kingfisher::file::File f(zone_file);
   if (f.Valid()) {
     try {
       // read head
       std::string head = f.ReadBytes(4);
       if ("TZif" != head) {
-        throw std::login_error("bad time zone file");
+        throw std::logic_error("bad time zone file");
       }
 
       // read version
@@ -76,31 +82,34 @@ bool ReadTimeZoneFile(const char *zone_file, struct TimeZone::Data *data) {
       int32_t isstdcnt = f.ReadInt32();
       int32_t leapcnt = f.ReadInt32();
       int32_t timecnt = f.ReadInt32();
+      int32_t typecnt = f.ReadInt32();
       int32_t charcnt = f.ReadInt32();
 
       std::vector<int32_t> trans;
       std::vector<int> localtimes;
-      trans.reserver(timecnt);
+      trans.reserve(timecnt);
       for (int i = 0; i < timecnt; ++i) {
         trans.push_back(f.ReadInt32());
       }
 
       for (int i = 0; i < timecnt; ++i) {
         uint8_t local = f.ReadUInt8();
-        localtime.push_back(local);
+        localtimes.push_back(local);
       }
 
       for (int i = 0; i < typecnt; ++i) {
         int32_t gmtoff = f.ReadInt32();
         uint8_t isdst = f.ReadUInt8();
         uint8_t abbrind = f.ReadUInt8();
-        data->locatimes_.push_back(Localtime(gmtoff, isdst, abbrind));
+        data->localtimes_.push_back(Localtime(gmtoff, isdst, abbrind));
       }
 
       for (int i = 0; i < timecnt; ++i) {
         int local_idx = localtimes[i];
-        time_t locatime = trans[i] + data->locatimes_[local_idx].gmt_off_set_;
-        data->transition_.push_back(Transition(trans[i], localtime, local_idx));
+        std::time_t localtime =
+            trans[i] + data->localtimes_[local_idx].gmt_off_set_;
+        data->transitions_.push_back(
+            Transition(trans[i], localtime, local_idx));
       }
 
       data->abbreviation_ = f.ReadBytes(charcnt);
@@ -126,7 +135,7 @@ bool ReadTimeZoneFile(const char *zone_file, struct TimeZone::Data *data) {
 const Localtime *FindLocalTime(const TimeZone::Data &data,
                                const Transition &trans, const Compare &comp) {
   const Localtime *localtime = nullptr;
-  if (data.transition_.empty() || comp(trans, data.transition_.front())) {
+  if (data.transitions_.empty() || comp(trans, data.transitions_.front())) {
     // FIXME: should be first non dst time zone
     localtime = &data.localtimes_.front();
   } else {
@@ -135,18 +144,18 @@ const Localtime *FindLocalTime(const TimeZone::Data &data,
     // [data.transitions.begin (), data.transitions.end ()) which does not
     // compare less than trans.
     std::vector<Transition>::const_iterator transI = std::lower_bound(
-        data.transition_.begin(), data.transition_.end(), trans, comp);
+        data.transitions_.begin(), data.transitions_.end(), trans, comp);
 
     if (transI != data.transitions_.end()) {
       if (!comp.Equal(trans, *transI)) {
-        assert(trans ! = data.transitions_.begin());
+        assert(transI != data.transitions_.begin());
         --transI;
       }
 
-      localtime = &data.localtime_[transI->localtime_index_];
+      localtime = &data.localtimes_[transI->localtime_index_];
     } else {
       // FIXME: use TZ-env
-      locatime = &data.localtime_[data.transition_.back().localtime_index_];
+      localtime = &data.localtimes_[data.transitions_.back().localtime_index_];
     }
   }
 
@@ -155,7 +164,7 @@ const Localtime *FindLocalTime(const TimeZone::Data &data,
 
 TimeZone::TimeZone(const char *zone_file)
     : data_(std::make_shared<TimeZone::Data>()) {
-  if (ReadTimeZoneFile(zone_file, data_.get())) {
+  if (!ReadTimeZoneFile(zone_file, data_.get())) {
     data_.reset();
   }
 }
@@ -166,33 +175,33 @@ TimeZone::TimeZone(int east_of_utc, const char *tzname)
   data_->abbreviation_ = std::string(tzname);
 }
 
-struct tm TimeZone::ToLocalTime(time_t seconds_since_epoch) const {
+struct tm TimeZone::ToLocalTime(std::time_t seconds_since_epoch) const {
   struct tm localtime;
   ::bzero(&localtime, sizeof(localtime));
   assert(nullptr != data_.get());
   const Data &data(*data_);
   Transition trans(seconds_since_epoch, 0, 0);
 
-  Localtime *local = FindLocalTime(data, trans, Compare(true));
+  const Localtime *local = FindLocalTime(data, trans, Compare(true));
   if (local) {
-    time_t local_seconds = seconds_since_epoch + local->gmt_off_set_;
+    std::time_t local_seconds = seconds_since_epoch + local->gmt_off_set_;
     ::gmtime_r(&local_seconds, &localtime);
     localtime.tm_isdst = local->is_dst_;
     localtime.tm_gmtoff = local->gmt_off_set_;
-    localtime.tm_zone = &data_->abbreviation_[local->abbr_index_];
+    localtime.tm_zone = &data_->abbreviation_[local->arrb_index_];
   }
 
   return localtime;
 }
 
-time_t TimeZone::FromLocalTime(const struct tm &t) const {
+std::time_t TimeZone::FromLocalTime(const struct tm &t) const {
   assert(nullptr != data_.get());
   struct tm localtime = t;
   const Data &data(*data_);
-  time_t seconds = ::timegm(&localtime);
-  Transition tran(0, senconds, 0);
+  std::time_t seconds = ::timegm(&localtime);
+  Transition tran(0, seconds, 0);
 
-  Localtime *local = FindLocalTime(data, tran, Compare(false));
+  const Localtime *local = FindLocalTime(data, tran, Compare(false));
   if (t.tm_isdst) {
     struct tm try_time = ToLocalTime(seconds - local->gmt_off_set_);
     if (!try_time.tm_isdst && try_time.tm_hour == localtime.tm_hour &&
@@ -201,22 +210,50 @@ time_t TimeZone::FromLocalTime(const struct tm &t) const {
     }
   }
 
-  return secnods - local->gmt_off_set_;
+  return seconds - local->gmt_off_set_;
 }
 
-time_t TimeZone::FromUtcTime(const struct tm &t) {
+std::time_t TimeZone::FromUtcTime(const struct tm &t) {
   return FromUtcTime(t.tm_year + 1900, t.tm_mon + 1, t.tm_mday, t.tm_hour,
                      t.tm_min, t.tm_sec);
 }
 
-time_t TimeZone::FromUtcTime(int year, int month, int day, int hour, int minute,
-                             int seconds) {
-#if 0
-Date date(year, month, day);
-int seconds_in_day = hour * 3600 + minute * 60 +seconds;
-time_t days =
-#endif
+std::time_t TimeZone::FromUtcTime(int year, int month, int day, int hour,
+                                  int minute, int seconds) {
+  Date date(year, month, day);
+  int seconds_in_day = hour * 3600 + minute * 60 + seconds;
+  std::time_t days = date.GetJulianDayNumber() - Date::kJulianDayOf1970_01_01;
+
+  return days * kSecondsPerDay + seconds_in_day;
 }
 
+struct tm TimeZone::ToUtcTime(std::time_t seconds_since_epoch,
+                              bool yday /*= false*/) {
+  struct tm utc;
+  ::bzero(&utc, sizeof(utc));
+  utc.tm_zone = "GMT";
+  int seconds = static_cast<int>(seconds_since_epoch % kSecondsPerDay);
+  int days = static_cast<int>(seconds_since_epoch / kSecondsPerDay);
+  if (seconds < 0) {
+    seconds += kSecondsPerDay;
+    --days;
+  }
+
+  FillHMS(seconds, &utc);
+  Date date(days + Date::kJulianDayOf1970_01_01);
+  Date::YearMonthDay ymd = date.GetYearMonthDay();
+  utc.tm_year = ymd.year - 1900;
+  utc.tm_mon = ymd.month - 1;
+  utc.tm_mday = ymd.day;
+  utc.tm_wday = date.WeekDay();
+
+  if (yday) {
+    Date start_of_year(ymd.year, 1, 1);
+    utc.tm_yday =
+        date.GetJulianDayNumber() - start_of_year.GetJulianDayNumber();
+  }
+
+  return utc;
+}
 }  // namespace time
 }  // namespace kingfisher

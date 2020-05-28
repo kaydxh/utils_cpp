@@ -35,6 +35,8 @@ struct Date::YearMonthDay CalculateYearMonthDay(int julian_day_number) {
   return ymd;
 }
 
+const int Date::kJulianDayOf1970_01_01 = CalculateJulianDayNumber(1970, 1, 1);
+
 Date::Date(int y, int m, int d)
     : julian_day_number_(CalculateJulianDayNumber(y, m, d)) {
   assert(m > 0 && m <= 12);

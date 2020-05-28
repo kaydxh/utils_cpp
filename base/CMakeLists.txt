@@ -7,6 +7,7 @@ set (
   thread/thread_pool.cc
   time/date.cc
   time/timestamp.cc
+  time/time_zone.cc
   utils/guid.cc
   )
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/configparser)
