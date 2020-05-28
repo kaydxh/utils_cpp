@@ -5,6 +5,7 @@ set (
   serializer/djson.cpp
   thread/thread.cc
   thread/thread_pool.cc
+  time/date.cc
   time/timestamp.cc
   utils/guid.cc
   )
