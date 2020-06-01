@@ -22,8 +22,50 @@ class ScopeGuardImplBase {
   bool dimissed_;
 };
 
-template <typename FunctionType, bool InvokeNoexcept>
-class ScopeGuardImpl : public ScopeGuardImplBase {};
+template <typename FunctionType>
+class ScopeGuardImpl : public ScopeGuardImplBase {
+ public:
+  explicit ScopeGuardImpl(const FunctionType &fn) noexcept(
+      std::is_nothrow_copy_constructible<FunctionType>::Value)
+      : ScopeGuardImpl(
+            fn, makeFailsafe(std::is_nothrow_copy_constructible<FunctionType>{},
+                             &fn)) {}
+
+  explicit ScopeGuardImpl(FunctionType &&fn) noexcept(
+      std::is_nothrow_move_constructible<FunctionType>::Value)
+      : ScopeGuardImpl(
+            std::move_if_noexcept(fn),
+            makeFailsafe(std::is_nothrow_move_constructible<FunctionType>{},
+                         &fn)) {}
+
+  ScopeGuardImpl(ScopeGuardImpl &&other) noexcept(
+      std::is_nothrow_move_constructible<FunctionType>::Value)
+      : function_(std::move_if_noexcept(other.function_)) {
+    dismissed_ = std::exchange(other.dismissed_, true);
+  }
+
+  ~ScopeGuardImpl() noexcept() {
+    if (!dismissed_) {
+      execute();
+    }
+  }
+
+ private:
+  static ScopeGuardImplBase makeFailsafe(std::true_type,
+                                         const void *) noexcept {
+    return makeEmptyScopeGuard();
+  }
+
+  template <typename Fn>
+  static auto makeFailsafe(std::false_type, Fn *fn) noexcept
+      -> ScopeGuardImpl<decltype(std::ref(*fn))> {
+    return ScopeGuardImpl < decltype(std::ref(*fn)){std::ref(*fn)};
+  }
+
+  void execute() noexcept() { function_(); }
+
+  FunctionType function_;
+};
 }  // namespace core
 }  // namespace kingfisher
 
