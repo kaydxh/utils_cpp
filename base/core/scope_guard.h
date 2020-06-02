@@ -97,17 +97,18 @@ ScopeGuardImpl<typename std::decay<FunctionType>::type> operator+(
       std::forward<FunctionType>(fn));
 }
 
-#if 0
-#define SCOPE_EXIT                                \
-  auto KF_ANONYMOUS_VARIABLES(SCOPE_EXIT_STATE) = \
-      ScopeGuardOnExit() + [&]() noexcept
+#if 1
+#define SCOPE_EXIT \
+  auto KF_ANONYMOUS_VARIABLES = ScopeGuardOnExit() + [&]() noexcept
 #endif
 
 }  // namespace core
 }  // namespace kingfisher
 
+#if 0
 #define SCOPE_EXIT              \
   auto KF_ANONYMOUS_VARIABLES = \
       kingfisher::core::ScopeGuardOnExit() + [&]() noexcept
+#endif
 
 #endif
