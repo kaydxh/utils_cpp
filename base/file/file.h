@@ -18,8 +18,14 @@ namespace file {
 
 class File : kingfisher::noncopyable {
  public:
+  // Creates an empty File object, for late initialization
+  File() noexcept;
+
+  // File(const std::string& file_name, int flags = std::O_RDONLY,
+  //     unsigned int mode = 0666);
   File(const char* file_name) : fp_(::fopen(file_name, "rb")) {}
 
+  explicit File(int fd, bool owns_fd = false) noexcept;
   ~File() {
     if (fp_) {
       ::fclose(fp_);
@@ -58,6 +64,8 @@ class File : kingfisher::noncopyable {
 
     return ret;
   }
+
+  static File temporary();
 
  private:
   FILE* fp_;
