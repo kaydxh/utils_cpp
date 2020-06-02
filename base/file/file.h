@@ -23,15 +23,15 @@ class File : kingfisher::noncopyable {
 
   // File(const std::string& file_name, int flags = std::O_RDONLY,
   //     unsigned int mode = 0666);
-  File(const char* file_name) : fp_(::fopen(file_name, "rb")) {}
+  File(const char* file_name) : fp_(::fopen(file_name, "rb")) {
+    fd_ = ::fileno(fp_);
+  }
 
   explicit File(int fd, bool owns_fd = false) noexcept;
-  ~File() {
-    if (fp_) {
-      ::fclose(fp_);
-      fp_ = nullptr;
-    }
-  }
+
+  File(File&& other);
+
+  ~File() { Close(); }
 
   bool Valid() const { return nullptr != fp_; }
 
@@ -65,10 +65,23 @@ class File : kingfisher::noncopyable {
     return ret;
   }
 
+  int GetFd() const { return fd_; }
+
+  void Swap(File& other);
+
+  File Dup() const;
+
   static File temporary();
 
+  int Release();
+
+  bool Close();
+
  private:
+  int fd_;
   FILE* fp_;
+
+  bool owns_fd_;
 };
 }  // namespace file
 }  // namespace kingfisher

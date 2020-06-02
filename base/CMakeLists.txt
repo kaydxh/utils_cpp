@@ -1,6 +1,7 @@
 set (
   base_SRC
   configparser/config_parser.cpp
+  file/file.cc
   hash/md5.cpp
   serializer/djson.cpp
   thread/thread.cc
