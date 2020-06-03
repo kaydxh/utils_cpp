@@ -20,8 +20,8 @@ TEST(test_Guid, Guid) {
   for (auto i = 0; i < 100; ++i) {
     guid1 = Guid::GenUuidString();
     guid2 = Guid::GenUuidString();
-    std::cout << guid1 << " " << guid1.length() << std::endl;
-    std::cout << guid2 << " " << guid2.length() << std::endl;
+    //    std::cout << guid1 << " " << guid1.length() << std::endl;
+    //   std::cout << guid2 << " " << guid2.length() << std::endl;
     EXPECT_NE(guid1, guid2);
     EXPECT_EQ(guid1.length(), 36);
     EXPECT_EQ(guid2.length(), 36);

@@ -60,10 +60,11 @@ void Test(const kingfisher::time::TimeZone& tz, const TestCase& tc) {
     struct tm local = tz.ToLocalTime(gmt);
     char buf[256] = {'0'};
     ::strftime(buf, sizeof(buf), "%F %T%z(%Z)", &local);
-    std::cout << "buf: " << std::string(buf) << ", tc.local: " << tc.local
-              << std::endl;
-    std::cout << "isdst: " << tc.isdst << ", local.tm_isdst: " << local.tm_isdst
-              << std::endl;
+    //  std::cout << "buf: " << std::string(buf) << ", tc.local: " << tc.local
+    //           << std::endl;
+    // std::cout << "isdst: " << tc.isdst << ", local.tm_isdst: " <<
+    // local.tm_isdst
+    //          << std::endl;
     if (::strcmp(buf, tc.local) != 0 || tc.isdst != local.tm_isdst) {
       printf("WRONG: ");
       ASSERT_TRUE(false);
