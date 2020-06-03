@@ -23,7 +23,8 @@ class File : kingfisher::noncopyable {
 
   // File(const std::string& file_name, int flags = std::O_RDONLY,
   //     unsigned int mode = 0666);
-  File(const char* file_name) : fp_(::fopen(file_name, "rb")) {
+  File(const char* filename)
+      : filename_(filename), fp_(::fopen(filename, "rb")) {
     fd_ = ::fileno(fp_);
   }
 
@@ -34,6 +35,10 @@ class File : kingfisher::noncopyable {
   ~File() { Close(); }
 
   bool Valid() const { return nullptr != fp_; }
+
+  size_t GetFileSize() const;
+  size_t GetPositon() const;
+  bool SetPositon() const;
 
   std::string ReadBytes(int n) {
     char buf[n];
@@ -66,6 +71,7 @@ class File : kingfisher::noncopyable {
   }
 
   int GetFd() const { return fd_; }
+  FILE* GetFile() const { return fp_; }
 
   void Swap(File& other);
 
@@ -78,9 +84,9 @@ class File : kingfisher::noncopyable {
   bool Close();
 
  private:
+  std::string filename_;
   int fd_;
   FILE* fp_;
-
   bool owns_fd_;
 };
 }  // namespace file

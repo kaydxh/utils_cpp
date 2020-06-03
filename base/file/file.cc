@@ -1,6 +1,8 @@
 #include "file.h"
+#include <sys/stat.h>
 #include <unistd.h>
 #include <cassert>
+#include <iostream>
 #include "core/likely.h"
 #include "core/scope_guard.h"
 
@@ -29,10 +31,28 @@ File::File(const std::string &file_name, int flags /* = O_RDONLY*/,
 
 File::File(File&& other) : fd_(other.fd_), owns_fd_(other.owns_fd_) {}
 
+size_t File::GetFileSize() const {
+  if (!Valid()) {
+    return 0;
+  }
+
+  struct stat statbuf;
+  return (0 != ::fstat(fd_, &statbuf)) ? 0 : statbuf.st_size;
+}
+
+size_t File::GetPositon() const {
+  if (!Valid()) {
+    return 0;
+  }
+
+  return static_cast<size_t>(::lseek(fd_, 0, SEEK_CUR));
+}
+
 void File::Swap(File& other) {
   std::swap(fd_, other.fd_);
   std::swap(owns_fd_, other.owns_fd_);
   std::swap(fp_, other.fp_);
+  std::swap(filename_, other.filename_);
 }
 
 /*static*/ File File::temporary() {
@@ -71,8 +91,10 @@ int File::Release() {
 }
 
 bool File::Close() {
+  std::cout << "close fd_, filename: " << filename_ << std::endl;
   int ret = owns_fd_ ? ::close(fd_) : 0;
   if (fp_) {
+    std::cout << "close fp_, filename: " << filename_ << std::endl;
     ::fclose(fp_);
     fp_ = nullptr;
   }
