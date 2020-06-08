@@ -9,12 +9,12 @@
 namespace kingfisher {
 namespace file {
 
-File::File() noexcept : fd_(-1), fp_(nullptr), owns_fd_(false) {}
+File::File() noexcept : fd_(-1), owns_fd_(false) {}
 
 File::File(int fd, bool owns_fd /*= false*/) noexcept
     : fd_(fd), owns_fd_(owns_fd) {
   assert(fd_ > 0);
-  fp_ = fdopen(fd_, "r");
+  //  fp_ = fdopen(fd_, "r");
 }
 
 #if 0
@@ -51,7 +51,7 @@ size_t File::GetPositon() const {
 void File::Swap(File& other) {
   std::swap(fd_, other.fd_);
   std::swap(owns_fd_, other.owns_fd_);
-  std::swap(fp_, other.fp_);
+  // std::swap(fp_, other.fp_);
   std::swap(filename_, other.filename_);
 }
 
@@ -93,11 +93,13 @@ int File::Release() {
 bool File::Close() {
   std::cout << "close fd_, filename: " << filename_ << std::endl;
   int ret = owns_fd_ ? ::close(fd_) : 0;
+#if 0
   if (fp_) {
     std::cout << "close fp_, filename: " << filename_ << std::endl;
     ::fclose(fp_);
     fp_ = nullptr;
   }
+#endif
   Release();
   return (0 == ret);
 }

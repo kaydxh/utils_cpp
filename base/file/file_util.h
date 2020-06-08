@@ -53,6 +53,7 @@ ssize_t WrapFileOpFuncT(Func f, int fd, void *buf, size_t size,
 
 }  // namespace detail
 
+int Open(
 ssize_t ReadFull(int fd, void *buf, size_t length);
 
 }  // namespace fileutil
