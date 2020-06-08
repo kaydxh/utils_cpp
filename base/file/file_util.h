@@ -5,8 +5,11 @@
 #ifndef KINGFISHER_BASE_FILE_FILE_UTIL_H_
 #define KINGFISHER_BASE_FILE_FILE_UTIL_H_
 
+#include <fcntl.h>
+#include <sys/types.h>
 #include <unistd.h>
 #include <cerrno>
+#include <iostream>
 
 namespace kingfisher {
 namespace fileutil {
@@ -39,6 +42,8 @@ ssize_t WrapFileOpFuncT(Func f, int fd, void *buf, size_t size,
         continue;
       }
 
+      std::cout << "read failed" << std::endl;
+
       return ret;
     }
 
@@ -53,7 +58,8 @@ ssize_t WrapFileOpFuncT(Func f, int fd, void *buf, size_t size,
 
 }  // namespace detail
 
-int Open(
+int Open(const char *filename, int flags = O_RDWR | O_LARGEFILE | O_CREAT,
+         mode_t mode = 0666);
 ssize_t ReadFull(int fd, void *buf, size_t length);
 
 }  // namespace fileutil

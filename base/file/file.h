@@ -7,6 +7,7 @@
 #include <endian.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <iostream>
 //#include <string.h>
 #include <stdexcept>
 #include "file_util.h"
@@ -24,10 +25,15 @@ class File : kingfisher::noncopyable {
 
   // File(const std::string& file_name, int flags = std::O_RDONLY,
   //     unsigned int mode = 0666);
-  File(const char* filename)
+  File(const char* filename, int flags = O_RDWR | O_LARGEFILE | O_CREAT,
+       mode_t mode = 0666)
       : filename_(filename) {  // fp_(::fopen(filename, "rb")) {
-    fd_ = kingfisher::fileutil::Open(open, filename, flags, mode);
-    if (valid()) {
+    if (fd_) {
+      Close();
+    }
+
+    fd_ = kingfisher::fileutil::Open(filename, flags, mode);
+    if (Valid()) {
       owns_fd_ = true;
     }
     //    fd_ = ::fileno(fp_);
@@ -46,7 +52,7 @@ class File : kingfisher::noncopyable {
   bool SetPositon() const;
 
   size_t Read(void* buf, size_t size) {
-    if (Valid()) {
+    if (!Valid()) {
       return 0;
     }
 
@@ -57,6 +63,8 @@ class File : kingfisher::noncopyable {
     char buf[n];
     ssize_t bytes = Read(buf, n);
     if (n != static_cast<int>(bytes)) {
+      std::cout << "n: " << n << ",read bytes: " << static_cast<int>(bytes)
+                << std::endl;
       throw std::logic_error("no enough data to read");
     }
 

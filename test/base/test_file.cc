@@ -18,11 +18,11 @@ class test_File : public testing::Test {
 TEST_F(test_File, Open) {
   File f;
   EXPECT_EQ(-1, f.GetFd());
-  // File f2("/etc/hosts");
-  File f2("/etc/vimrc");
+  File f2("/etc/hosts");
   EXPECT_NE(-1, f2.GetFd());
   size_t f2_size = f2.GetFileSize();
   std::cout << "f2_size :" << f2_size << std::endl;
+
   auto str = f2.ReadBytes(10);
   // auto str = f2.ReadUInt8();
   std::cout << "read content:" << str << std::endl;
@@ -38,6 +38,7 @@ TEST_F(test_File, Open) {
   EXPECT_NE(-1, tmp_fd);
 
   tmp.Swap(f2);
+
 #if 0
   str = tmp.ReadBytes(10);
   std::cout << "read content:" << str << std::endl;
