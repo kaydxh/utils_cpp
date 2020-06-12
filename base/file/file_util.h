@@ -42,8 +42,6 @@ ssize_t WrapFileOpFuncT(Func f, int fd, void *buf, size_t size,
         continue;
       }
 
-      std::cout << "read failed" << std::endl;
-
       return ret;
     }
 
