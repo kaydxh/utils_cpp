@@ -10,8 +10,8 @@
 #define DISABLE_ASSIGN(ClassName) \
   ClassName &operator=(const ClassName &) = delete
 
-#define DISABLE_COPY_AND_ASSIGN(ClassName &) \
-  DISABLE_COPY(ClassName);                   \
+#define DISABLE_COPY_AND_ASSIGN(ClassName) \
+  DISABLE_COPY(ClassName);                 \
   DISABLE_ASSIGN(ClassName)
 
 #define DISABLE_IMPLICIT_CONSTRUCTORS(ClassName) \
