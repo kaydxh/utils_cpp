@@ -21,7 +21,24 @@ TEST_F(test_Timer, ALL) {
   using Callback = std::function<void()>;
   TimerWheel timers;
   int count = 0;
-  TimerEvent<Callback> event([&count]() { ++count; });
+  TimerEvent<Callback> event([&count]() {
+    std::cout << "callback event" << std::endl;
+    ++count;
+  });
 
-  timers.scheduleRepeating(&event, 5);
+  timers.advance(10);
+  EXPECT_EQ(count, 0);
+  EXPECT_TRUE(!event.active());
+
+  timers.schedule(&event, 5);
+  EXPECT_TRUE(event.active());
+  timers.advance(5);
+  EXPECT_EQ(count, 1);
+
+  timers.advance(255);
+  EXPECT_EQ(count, 1);
+
+  timers.schedule(&event, 5);
+  timers.advance(5);
+  EXPECT_EQ(count, 2);
 }

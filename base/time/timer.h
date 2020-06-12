@@ -5,6 +5,7 @@
 #ifndef KINNGFISHER_BASE_CORE_TIMER_H_
 #define KINNGFISHER_BASE_CORE_TIMER_H_
 
+#include <limits>
 #include "core/disable.h"
 
 namespace kingfisher {
@@ -22,7 +23,7 @@ class TimerEventBase {
 
   inline void cancel();
 
-  bool action() const { return nullptr != slot_; }
+  bool active() const { return nullptr != slot_; }
 
  private:
   DISABLE_COPY_AND_ASSIGN(TimerEventBase);
@@ -90,16 +91,21 @@ class TimerWheel {
   TimerWheel(Tick now = 0) : now_(now), ticks_pending_(0) {}
   ~TimerWheel() {}
 
+  bool advance(Tick interval,
+               size_t max_events = std::numeric_limits<size_t>::max());
+
   // a repeating timeout event that will fire every "interval" time
-  void scheduleRepeating(TimerEventBase* event, Tick interval);
+  void schedule(TimerEventBase* event, Tick interval);
 
  private:
   bool process_current_slot(Tick now, size_t max_execute);
 
  private:
   static const int WIDTH_BITS = 8;
+  // 256
   static const int NUM_SLOTS = 1 << WIDTH_BITS;
 
+  // 255 01111111
   static const int MASK = (NUM_SLOTS - 1);
   Tick now_;
   Tick ticks_pending_;
@@ -154,6 +160,29 @@ void TimerEventBase::cancel() {
   relink(nullptr);
 }
 
+bool TimerWheel::advance(Tick interval, size_t max_events) {
+  if (ticks_pending_) {
+    ticks_pending_ += interval;
+    Tick now = now_;
+    if (!process_current_slot(now, max_events)) {
+      return false;
+    }
+
+    interval = (ticks_pending_ - 1);
+    ticks_pending_ = 0;
+  }
+
+  while (interval--) {
+    Tick now = ++now_;
+    if (!process_current_slot(now, max_events)) {
+      ticks_pending_ = (interval + 1);
+      return false;
+    }
+  }
+
+  return true;
+}
+
 bool TimerWheel::process_current_slot(Tick now, size_t max_execute) {
   size_t slot_index = now & MASK;
   auto slot = &slots_[slot_index];
@@ -168,7 +197,7 @@ bool TimerWheel::process_current_slot(Tick now, size_t max_execute) {
   return true;
 }
 
-void TimerWheel::scheduleRepeating(TimerEventBase* event, Tick interval) {
+void TimerWheel::schedule(TimerEventBase* event, Tick interval) {
   event->set_scheduled_at(now_ + interval);
   while (interval >= NUM_SLOTS) {
     interval = (interval + (now_ & MASK)) >> WIDTH_BITS;
