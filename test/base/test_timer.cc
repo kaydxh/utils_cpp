@@ -22,10 +22,15 @@ TEST_F(test_Timer, ALL) {
   TimerWheel timers;
   int count = 0;
   TimerEvent<Callback> event([&count]() {
-    std::cout << "callback event" << std::endl;
+    std::cout << "callback event at time: " << getJiffies() << std::endl;
+    ++count;
+  });
+  TimerEvent<Callback> event2([&count]() {
+    std::cout << "callback event2 at time: " << getJiffies() << std::endl;
     ++count;
   });
 
+#if 0
   timers.advance(10);
   EXPECT_EQ(count, 0);
   EXPECT_TRUE(!event.active());
@@ -37,8 +42,13 @@ TEST_F(test_Timer, ALL) {
 
   timers.advance(255);
   EXPECT_EQ(count, 1);
+#endif
 
-  timers.schedule(&event, 5);
-  timers.advance(5);
+  timers.Schedule(&event, 100);
+  timers.Schedule(&event2, 200);
+  // timers.Schedule(&event, 300);
+  timers.Start();
+  sleep(10);
+
   EXPECT_EQ(count, 2);
 }

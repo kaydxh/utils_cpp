@@ -19,7 +19,7 @@ class TimerWheel;
 
 using Tick = uint64_t;
 
-static uint32_t getJiffies();
+uint64_t getJiffies();
 void msleep(uint32_t msecs);
 
 class TimerEventBase {
@@ -38,12 +38,15 @@ class TimerEventBase {
   virtual void run() = 0;
   virtual void relink(TimerWheelSlot* slot);
 
+  void set_rotation_at(size_t rotation_at) { rotation_at_ = rotation_at; }
   void set_scheduled_at(Tick ts) { scheduled_at_ = ts; }
 
  private:
   TimerWheelSlot* slot_ = nullptr;
   TimerEventBase* prev_ = nullptr;
   TimerEventBase* next_ = nullptr;
+
+  size_t rotation_at_ = 0;
 
   Tick scheduled_at_;
 };
@@ -73,7 +76,7 @@ class TimerWheelSlot {
   friend TimerWheel;
 
   // return the fist event queued in slot
-  const TimerEventBase* events() const { return events_; }
+  TimerEventBase* events() const { return events_; }
 
   // deque the first event from the slot, and return it
   TimerEventBase* popEvent() {
@@ -94,21 +97,21 @@ class TimerWheelSlot {
 
 class TimerWheel {
  public:
-  TimerWheel(Tick now = 0) : now_(getJiffies()), ticks_pending_(0) {}
+  TimerWheel() : now_(getJiffies()), ticks_pending_(0) {}
+
   ~TimerWheel() { thread_pool_.stop(); }
 
   void Start();
-  bool advance(Tick interval,
-               size_t max_events = std::numeric_limits<size_t>::max());
 
   // a repeating timeout event that will fire every "interval" time
-  void schedule(TimerEventBase* event, Tick interval);
+  void Schedule(TimerEventBase* event, Tick interval);
 
   void Join();
+  void Stop();
 
  private:
   void runLoop();
-  bool process_current_slot(Tick now, size_t max_execute);
+  bool process_current_slot();
 
  private:
   static const int WIDTH_BITS = 8;
@@ -127,6 +130,7 @@ class TimerWheel {
 
   // std::thread thread_;
   bool running_ = true;
+  size_t cur_slot_index_ = 0;
 };
 
 // implementation
@@ -184,9 +188,7 @@ void TimerWheel::Start() {
 
 void TimerWheel::runLoop() {
   while (running_) {
-    //  Tick now = ++now_;
-    Tick now = now_;
-    if (!process_current_slot(now, std::numeric_limits<size_t>::max())) {
+    if (!process_current_slot()) {
     }
     msleep(1);
   }
@@ -194,60 +196,39 @@ void TimerWheel::runLoop() {
 
 void TimerWheel::Join() { thread_pool_.join(); }
 
-bool TimerWheel::advance(Tick interval, size_t max_events) {
-  return true;
-  if (ticks_pending_) {
-    ticks_pending_ += interval;
-    Tick now = now_;
-    if (!process_current_slot(now, max_events)) {
-      return false;
-    }
-
-    interval = (ticks_pending_ - 1);
-    ticks_pending_ = 0;
-  }
-
-  while (interval--) {
-    msleep(1);
-    Tick now = ++now_;
-    if (!process_current_slot(now, max_events)) {
-      ticks_pending_ = (interval + 1);
-      return false;
-    }
-  }
-
-  return true;
-}
-
-bool TimerWheel::process_current_slot(Tick now, size_t max_execute) {
-  now = getJiffies() - now_;
-  size_t slot_index = now & MASK;
-  auto slot = &slots_[slot_index];
+bool TimerWheel::process_current_slot() {
+  auto slot = &slots_[cur_slot_index_];
   while (slot->events()) {
-    auto event = slot->popEvent();
-    event->run();
-    if (!--max_execute) {
-      return false;
+    if (slot->events()->rotation_at_ > 0) {
+      --slot->events()->rotation_at_;
+      std::cout << "process rotation: " << slot->events()->rotation_at_
+                << std::endl;
+    } else {
+      auto event = slot->popEvent();
+      event->run();
     }
   }
+
+  cur_slot_index_ = (cur_slot_index_ + 1) % NUM_SLOTS;
 
   return true;
 }
 
-void TimerWheel::schedule(TimerEventBase* event, Tick interval) {
-  auto diff = getJiffies() - now_;
-  std::cout << "diff: " << diff << std::endl;
-  event->set_scheduled_at(diff + interval);
-  while (interval >= NUM_SLOTS) {
-    interval = (interval + (now_ & MASK)) >> WIDTH_BITS;
-  }
+void TimerWheel::Stop() { thread_pool_.stop(); }
 
-  size_t slot_index = (diff + interval) & MASK;
+void TimerWheel::Schedule(TimerEventBase* event, Tick interval) {
+  auto tm = getJiffies() - now_ + interval;
+  int rotation = tm / NUM_SLOTS;
+  size_t slot_index = tm % NUM_SLOTS;
+  event->set_rotation_at(rotation);
+  std::cout << "rotation: " << rotation << ", slot_index: " << slot_index
+            << std::endl;
   auto slot = &slots_[slot_index];
+
   event->relink(slot);
 }
 
-static uint32_t getJiffies() {
+uint64_t getJiffies() {
   struct timespec ts;
   clock_gettime(CLOCK_MONOTONIC, &ts);
   return (ts.tv_sec * 1000 + ts.tv_nsec / 1e6);
