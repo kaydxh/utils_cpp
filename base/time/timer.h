@@ -46,7 +46,11 @@ class TimerEventBase {
   TimerEventBase* prev_ = nullptr;
   TimerEventBase* next_ = nullptr;
 
+  int32_t repeated_times_ = 1;
+  size_t org_rotation_at_ = 0;
   size_t rotation_at_ = 0;
+
+  Tick interval_ = 0;
 
   Tick scheduled_at_;
 };
@@ -104,7 +108,8 @@ class TimerWheel {
   void Start();
 
   // a repeating timeout event that will fire every "interval" time
-  void Schedule(TimerEventBase* event, Tick interval);
+  void Schedule(TimerEventBase* event, Tick interval,
+                int32_t repeated_times = 1);
 
   void Join();
   void Stop();
@@ -199,6 +204,7 @@ void TimerWheel::Join() { thread_pool_.join(); }
 bool TimerWheel::process_current_slot() {
   auto slot = &slots_[cur_slot_index_];
   while (slot->events()) {
+    // while ((&slots_[cur_slot_index_])->events()) {
     if (slot->events()->rotation_at_ > 0) {
       --slot->events()->rotation_at_;
       std::cout << "process rotation: " << slot->events()->rotation_at_
@@ -206,6 +212,16 @@ bool TimerWheel::process_current_slot() {
     } else {
       auto event = slot->popEvent();
       event->run();
+      now_ = getJiffies();
+      if (event->repeated_times_ == 1) {
+        ;  // do nothing
+
+      } else if (event->repeated_times_ > 1) {
+        Schedule(event, event->interval_, --event->repeated_times_);
+
+      } else {  // (event->repeated_times_ <= 0)
+        Schedule(event, event->interval_, -1);
+      }
     }
   }
 
@@ -214,13 +230,19 @@ bool TimerWheel::process_current_slot() {
   return true;
 }
 
-void TimerWheel::Stop() { thread_pool_.stop(); }
+void TimerWheel::Stop() {
+  running_ = false;
+  thread_pool_.stop();
+}
 
-void TimerWheel::Schedule(TimerEventBase* event, Tick interval) {
+void TimerWheel::Schedule(TimerEventBase* event, Tick interval,
+                          int32_t repeated_times) {
   auto tm = getJiffies() - now_ + interval;
   int rotation = tm / NUM_SLOTS;
-  size_t slot_index = tm % NUM_SLOTS;
+  size_t slot_index = (tm + cur_slot_index_) % NUM_SLOTS;
   event->set_rotation_at(rotation);
+  event->interval_ = interval;
+  event->repeated_times_ = repeated_times;
   std::cout << "rotation: " << rotation << ", slot_index: " << slot_index
             << std::endl;
   auto slot = &slots_[slot_index];

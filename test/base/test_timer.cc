@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <atomic>
 #include <iostream>
 
 #include <functional>
@@ -17,38 +18,62 @@ class test_Timer : public testing::Test {
   virtual void TearDown(void) {}
 };
 
-TEST_F(test_Timer, ALL) {
+TEST_F(test_Timer, Once) {
   using Callback = std::function<void()>;
   TimerWheel timers;
-  int count = 0;
+  std::atomic<int> count(0);
   TimerEvent<Callback> event([&count]() {
-    std::cout << "callback event at time: " << getJiffies() << std::endl;
     ++count;
+    std::cout << "callback event at time: " << getJiffies()
+              << ", count: " << count << std::endl;
   });
-  TimerEvent<Callback> event2([&count]() {
-    std::cout << "callback event2 at time: " << getJiffies() << std::endl;
-    ++count;
-  });
-
-#if 0
-  timers.advance(10);
-  EXPECT_EQ(count, 0);
-  EXPECT_TRUE(!event.active());
-
-  timers.schedule(&event, 5);
-  EXPECT_TRUE(event.active());
-  timers.advance(5);
-  EXPECT_EQ(count, 1);
-
-  timers.advance(255);
-  EXPECT_EQ(count, 1);
-#endif
 
   timers.Schedule(&event, 100);
-  timers.Schedule(&event2, 200);
-  // timers.Schedule(&event, 300);
+  EXPECT_EQ(count, 0);
   timers.Start();
-  sleep(10);
+  sleep(1);
+  EXPECT_EQ(count, 1);
+  timers.Stop();
+}
 
-  EXPECT_EQ(count, 2);
+TEST_F(test_Timer, Multi) {
+  using Callback = std::function<void()>;
+  TimerWheel timers;
+  std::atomic<int> count(0);
+  TimerEvent<Callback> event([&count]() {
+    ++count;
+    std::cout << "callback event at time: " << getJiffies()
+              << ", count: " << count << std::endl;
+  });
+
+  timers.Schedule(&event, 100, 10);
+  EXPECT_EQ(count, 0);
+  timers.Start();
+  sleep(2);
+  EXPECT_EQ(count, 10);
+  timers.Stop();
+}
+
+TEST_F(test_Timer, Mix) {
+  using Callback = std::function<void()>;
+  TimerWheel timers;
+  std::atomic<int> count(0);
+  TimerEvent<Callback> event([&count]() {
+    ++count;
+    std::cout << "callback event at time: " << getJiffies()
+              << ", count: " << count << std::endl;
+  });
+
+  TimerEvent<Callback> event2([&count]() {
+    ++count;
+    std::cout << "callback event2 at time: " << getJiffies()
+              << ", count: " << count << std::endl;
+  });
+
+  timers.Schedule(&event, 100, 10);
+  timers.Schedule(&event2, 10, 20);
+  timers.Start();
+  sleep(3);
+  EXPECT_EQ(count, 30);
+  timers.Stop();
 }
