@@ -93,14 +93,31 @@ int File::Release() {
   return released;
 }
 
+void File::Unlock() { kingfisher::fileutil::Flock(fd_, LOCK_UN); }
+
+bool File::TryLock() { return doTryLock(LOCK_EX); }
+
+bool File::TryLockShared() { return doTryLock(LOCK_SH); }
+
+void File::UnlockShared() { Unlock(); }
+
+void File::doLock(int op) { kingfisher::fileutil::Flock(fd_, op); }
+
+bool File::doTryLock(int op) {
+  int ret = kingfisher::fileutil::Flock(fd_, op | LOCK_NB);
+  if (-1 == ret || EWOULDBLOCK == ret) {
+    return false;
+  }
+
+  return true;
+}
+
 bool File::Close() {
   std::cout << "close fd_, filename: " << filename_ << std::endl;
   int ret = owns_fd_ ? ::close(fd_) : 0;
   Release();
   return (0 == ret);
 }
-
-void File::doLock(int op) { kingfisher::fileutil::Flock(fd_, op); }
 
 }  // namespace file
 }  // namespace kingfisher

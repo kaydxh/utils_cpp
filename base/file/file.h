@@ -118,12 +118,24 @@ class File : kingfisher::noncopyable {
 
   void Lock();
 
+  void UnLock();
+
+  bool TryLock();
+
+  bool TryLockShared();
+
+  void LockShard();
+
+  void UnlockShared();
+
   int Release();
 
   bool Close();
 
  private:
   void doLock(int op);
+
+  bool doTryLock(int op);
 
  private:
   std::string filename_;
