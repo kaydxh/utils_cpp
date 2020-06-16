@@ -58,7 +58,14 @@ ssize_t WrapFileOpFuncT(Func f, int fd, void *buf, size_t size,
 
 int Open(const char *filename, int flags = O_RDWR | O_LARGEFILE | O_CREAT,
          mode_t mode = 0666);
+
 ssize_t ReadFull(int fd, void *buf, size_t length);
+
+ssize_t WriteFull(int fd, const void *buf, size_t length);
+
+bool DeleteFile(const char *filename);
+
+int Flock(int fd, int operation);
 
 }  // namespace fileutil
 }  // namespace kingfisher

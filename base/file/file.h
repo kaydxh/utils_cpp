@@ -23,23 +23,10 @@ class File : kingfisher::noncopyable {
   // Creates an empty File object, for late initialization
   File() noexcept;
 
-  // File(const std::string& file_name, int flags = std::O_RDONLY,
-  //     unsigned int mode = 0666);
-  File(const char* filename, int flags = O_RDWR | O_LARGEFILE | O_CREAT,
-       mode_t mode = 0666)
-      : filename_(filename) {  // fp_(::fopen(filename, "rb")) {
-    if (fd_) {
-      Close();
-    }
-
-    fd_ = kingfisher::fileutil::Open(filename, flags, mode);
-    if (Valid()) {
-      owns_fd_ = true;
-    }
-    //    fd_ = ::fileno(fp_);
-  }
-
   explicit File(int fd, bool owns_fd = false) noexcept;
+
+  File(const char* filename, int flags = O_RDWR | O_LARGEFILE | O_CREAT,
+       mode_t mode = 0666);
 
   File(File&& other);
 
@@ -129,9 +116,14 @@ class File : kingfisher::noncopyable {
 
   static File temporary();
 
+  void Lock();
+
   int Release();
 
   bool Close();
+
+ private:
+  void doLock(int op);
 
  private:
   std::string filename_;

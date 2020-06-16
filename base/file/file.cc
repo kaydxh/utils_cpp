@@ -1,4 +1,5 @@
 #include "file.h"
+#include <sys/file.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <cassert>
@@ -14,20 +15,20 @@ File::File() noexcept : fd_(-1), owns_fd_(false) {}
 File::File(int fd, bool owns_fd /*= false*/) noexcept
     : fd_(fd), owns_fd_(owns_fd) {
   assert(fd_ > 0);
-  //  fp_ = fdopen(fd_, "r");
 }
 
-#if 0
-File::File(const std::string &file_name, int flags /* = O_RDONLY*/,
-           unsigned int mode /* = 0666*/)
-    : fd_(::open(file_name.c_str(), flags, mode)), owns_fd_(false) {
-  if (fd_ == -1) {
-    throw std::logic_error("open file failed");
+File::File(const char* filename, int flags /*= O_RDWR | O_LARGEFILE | O_CREAT*/,
+           mode_t mode /*= 0666*/)
+    : filename_(filename) {
+  if (fd_) {
+    Close();
   }
 
-  owns_fd_ = true;
+  fd_ = kingfisher::fileutil::Open(filename, flags, mode);
+  if (Valid()) {
+    owns_fd_ = true;
+  }
 }
-#endif
 
 File::File(File&& other) : fd_(other.fd_), owns_fd_(other.owns_fd_) {}
 
@@ -83,6 +84,8 @@ File File::Dup() const {
   return File();
 }
 
+void File::Lock() { doLock(LOCK_EX); }
+
 int File::Release() {
   int released = fd_;
   fd_ = -1;
@@ -93,16 +96,11 @@ int File::Release() {
 bool File::Close() {
   std::cout << "close fd_, filename: " << filename_ << std::endl;
   int ret = owns_fd_ ? ::close(fd_) : 0;
-#if 0
-  if (fp_) {
-    std::cout << "close fp_, filename: " << filename_ << std::endl;
-    ::fclose(fp_);
-    fp_ = nullptr;
-  }
-#endif
   Release();
   return (0 == ret);
 }
+
+void File::doLock(int op) { kingfisher::fileutil::Flock(fd_, op); }
 
 }  // namespace file
 }  // namespace kingfisher
