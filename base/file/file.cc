@@ -15,6 +15,16 @@ File::File() noexcept : fd_(-1), owns_fd_(false) {}
 File::File(int fd, bool owns_fd /*= false*/) noexcept
     : fd_(fd), owns_fd_(owns_fd) {
   assert(fd_ > 0);
+
+  char buf[256] = {'\0'};
+  char file_name_buf[256] = {'\0'};
+  snprintf(buf, sizeof(buf), "/proc/self/fd/%d", fd_);
+  if (readlink(buf, file_name_buf, 255) < 0) {
+    std::cerr << "readlink error" << std::endl;
+    return;
+  }
+
+  filename_ = std::string(file_name_buf);
 }
 
 File::File(const char* filename, int flags /*= O_RDWR | O_LARGEFILE | O_CREAT*/,
@@ -56,7 +66,7 @@ void File::Swap(File& other) {
   std::swap(filename_, other.filename_);
 }
 
-/*static*/ File File::temporary() {
+/*static*/ File File::Temporary() {
   using namespace kingfisher::core;
   FILE* tmp_file = std::tmpfile();
   SCOPE_EXIT {
@@ -91,6 +101,10 @@ int File::Release() {
   fd_ = -1;
   owns_fd_ = false;
   return released;
+}
+
+bool File::DeleteFile() {
+  return kingfisher::fileutil::DeleteFile(filename_.c_str());
 }
 
 void File::Unlock() { kingfisher::fileutil::Flock(fd_, LOCK_UN); }

@@ -108,17 +108,18 @@ class File : kingfisher::noncopyable {
   }
 #endif
   int GetFd() const { return fd_; }
-  // FILE* GetFile() const { return fp_; }
 
   void Swap(File& other);
 
   File Dup() const;
 
-  static File temporary();
+  static File Temporary();
+
+  bool DeleteFile();
 
   void Lock();
 
-  void UnLock();
+  void Unlock();
 
   bool TryLock();
 
@@ -140,7 +141,6 @@ class File : kingfisher::noncopyable {
  private:
   std::string filename_;
   int fd_;
-  // FILE* fp_;
   bool owns_fd_;
 };
 }  // namespace file

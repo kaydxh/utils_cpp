@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 #include <iostream>
+#include "core/scope_guard.h"
 #include "file/file.h"
 
 using namespace kingfisher;
@@ -32,7 +33,7 @@ TEST_F(test_File, Open) {
 
   // std::cout << "tt_pos :" << tt << std::endl;
 
-  File tmp = File::temporary();
+  File tmp = File::Temporary();
   int tmp_fd = tmp.GetFd();
   std::cout << "tmp_fd: " << tmp_fd << std::endl;
   EXPECT_NE(-1, tmp_fd);
@@ -48,4 +49,19 @@ TEST_F(test_File, Open) {
   auto tmp_pos = tmp.GetPositon();
   std::cout << "tmp_pos  :" << tmp_pos << std::endl;
 #endif
+}
+
+TEST_F(test_File, Lock) {
+  File f = File::Temporary();
+
+  SCOPE_EXIT { f.DeleteFile(); };
+
+  EXPECT_TRUE(f.TryLock());
+  EXPECT_TRUE(f.TryLock());
+  f.Unlock();
+  EXPECT_TRUE(f.TryLockShared());
+  f.UnlockShared();
+
+  f.Lock();
+  f.Unlock();
 }
