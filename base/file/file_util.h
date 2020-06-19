@@ -63,6 +63,8 @@ ssize_t ReadFull(int fd, void *buf, size_t length);
 
 ssize_t WriteFull(int fd, const void *buf, size_t length);
 
+bool CopyFile(const char *from_path, const char *to_path);
+
 bool DeleteFile(const char *filename);
 
 int Flock(int fd, int operation);
