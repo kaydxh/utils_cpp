@@ -243,8 +243,8 @@ void TimerWheel::Schedule(TimerEventBase* event, Tick interval,
   event->set_rotation_at(rotation);
   event->interval_ = interval;
   event->repeated_times_ = repeated_times;
-  std::cout << "rotation: " << rotation << ", slot_index: " << slot_index
-            << std::endl;
+  //  std::cout << "rotation: " << rotation << ", slot_index: " << slot_index
+  //           << std::endl;
   auto slot = &slots_[slot_index];
 
   event->relink(slot);
