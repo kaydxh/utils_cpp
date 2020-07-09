@@ -25,9 +25,11 @@ bool CopyFile(const char *from_path, const char *to_path) {
 
   SCOPE_EXIT {
     if (in_fd != -1) {
+      std::cout << "close in_fd: " << in_fd << std::endl;
       close(in_fd);
     }
     if (out_fd != -1) {
+      std::cout << "close out_fd: " << out_fd << std::endl;
       close(out_fd);
     }
   };
@@ -50,7 +52,6 @@ bool CopyFile(const char *from_path, const char *to_path) {
     if (sz != WriteFull(out_fd, buf, sz)) {
       return false;
     }
-    std::cout << "----WriteFull: " << sz << std::endl;
   }
 
   return true;

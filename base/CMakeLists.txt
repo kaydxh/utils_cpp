@@ -10,7 +10,7 @@ set (
   time/date.cc
   time/timestamp.cc
   time/time_zone.cc
-  utils/guid.cc
+  uuid/guid.cc
   )
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/configparser)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/hash)
