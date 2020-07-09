@@ -19,4 +19,6 @@ class test_FileUtil : public testing::Test {
 TEST_F(test_FileUtil, All) {
   EXPECT_TRUE(CopyFile("/etc/hosts", "./hosts"));
   EXPECT_FALSE(CopyFile("/etc/host", "./host"));
+
+  EXPECT_TRUE(DeleteFile("./hosts"));
 }

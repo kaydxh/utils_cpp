@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "utils/guid.h"
+#include "uuid/guid.h"
 
 using namespace kingfisher;
 using namespace kingfisher::utils;
