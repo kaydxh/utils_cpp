@@ -5,6 +5,10 @@
 #ifndef KINGFISHER_BASE_LRU_LRU_CACHE_H_
 #define KINGFISHER_BASE_LRU_LRU_CACHE_H_
 
+#include <list>
+#include <mutex>
+#include <unordered_map>
+
 namespace kingfisher {
 namespace lru {
 
