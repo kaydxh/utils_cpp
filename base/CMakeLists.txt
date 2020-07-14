@@ -1,10 +1,10 @@
 set (
   base_SRC
-  configparser/config_parser.cpp
+  configparser/config_parser.cc
   file/file.cc
   file/file_util.cc
-  hash/md5.cpp
-  serializer/djson.cpp
+  hash/md5.cc
+  serializer/djson.cc
   thread/thread.cc
   thread/thread_pool.cc
   time/date.cc
