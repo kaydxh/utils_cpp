@@ -25,7 +25,10 @@ class LruCache {
  private:
   std::mutex mutex_;
   size_t capacity_;
+  // lru cache, save visited elements, last visited element put front, first
+  // visited element put back
   std::list<KeyValuePairType> cache_items_list_;
+  // key -> iterator, through key, can visit element from list fastly
   std::unordered_map<KeyType, ListIteratorType> cache_items_map_;
 };
 
@@ -33,9 +36,9 @@ template <typename KeyType, typename ValueType>
 LruCache<KeyType, ValueType>::LruCache(size_t capacity) : capacity_(capacity) {}
 
 template <typename KeyType, typename ValueType>
-void LruCache::<KeyType, ValueType>::Put(const KeyType &key,
-                                         const ValueType &value) {
-  std::unnique_lock<std::mutex> lock(mutex_);
+void LruCache<KeyType, ValueType>::Put(const KeyType &key,
+                                       const ValueType &value) {
+  std::unique_lock<std::mutex> lock(mutex_);
 
   auto it = cache_items_map_.find(key);
   if (it != cache_items_map_.end()) {
@@ -53,19 +56,19 @@ void LruCache::<KeyType, ValueType>::Put(const KeyType &key,
 }
 
 template <typename KeyType, typename ValueType>
-bool LruCache::<KeyType, ValueType>::Get(const KeyType &key, ValueType &value) {
+bool LruCache<KeyType, ValueType>::Get(const KeyType &key, ValueType &value) {
   std::unique_lock<std::mutex> lock_(mutex_);
 
   auto it = cache_items_map_.find(key);
-  if (it == cache_items_map.end()) {
+  if (it == cache_items_map_.end()) {
     return false;
-  } else {
-    cache_items_list_.splice(cache_items_list_.begin(), cache_items_list_,
-                             it->second);
-    value = it->second->second;
-    return true;
   }
+  cache_items_list_.splice(cache_items_list_.begin(), cache_items_list_,
+                           it->second);
+  value = it->second->second;
+  return true;
 }
 
 }  // namespace lru
+}  // namespace kingfisher
 #endif
