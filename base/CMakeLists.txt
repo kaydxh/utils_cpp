@@ -1,6 +1,7 @@
 set (
   base_SRC
   configparser/config_parser.cc
+  dump/stack_trace.cc
   file/file.cc
   file/file_util.cc
   hash/md5.cc
@@ -11,6 +12,7 @@ set (
   time/timestamp.cc
   time/time_zone.cc
   uuid/guid.cc
+
   )
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/configparser)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/hash)
