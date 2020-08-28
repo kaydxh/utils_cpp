@@ -14,11 +14,11 @@ class StackTrace {
   StackTrace();
   ~StackTrace();
 
-  const char* GetStackTrace() const throw();
+  const char* GetStackTrace();
 
  private:
   void demangleSymbol(std::string& symbol);
-  void processStackTrack();
+  // void processStackTrack();
 
  private:
   std::string stack_;

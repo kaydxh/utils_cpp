@@ -20,7 +20,7 @@ void StackTrace::demangleSymbol(std::string& symbol) {
   std::string::size_type from_pos = 0;
   while (from_pos < symbol.size()) {
     std::string::size_type mangled_start =
-        symbol.find(kSymbolCharacters, from_pos);
+        symbol.find(kMangledSymbolPrefix, from_pos);
     if (mangled_start == std::string::npos) {
       break;
     }
@@ -53,7 +53,7 @@ void StackTrace::demangleSymbol(std::string& symbol) {
   }
 }
 
-void StackTrace::processStackTrack() {
+const char* StackTrace::GetStackTrace() {
   static const int kStackLenght = 128;
   void* stack_buf[kStackLenght];
   int size = ::backtrace(stack_buf, kStackLenght);
@@ -69,6 +69,8 @@ void StackTrace::processStackTrack() {
       stack_.push_back('\n');
     }
   }
+
+  return stack_.c_str();
 }
 
 }  // namespace dump
