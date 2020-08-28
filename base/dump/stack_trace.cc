@@ -3,6 +3,7 @@
 #include <execinfo.h>  // backtrace and backtrace_symbols func
 #include <signal.h>
 #include <string.h>
+#include <unistd.h>
 #include <iostream>
 #include <memory>
 
@@ -26,11 +27,26 @@ const struct {
     {SIGABRT, "SIGABRT"}, {SIGTERM, "SIGTERM"},
 };
 
+int invokeDefaultSignalHandler(int signal_number);
+void failureSignalHandler(int signal_number, siginfo_t* signal_info,
+                          void* context);
+
+int invokeDefaultSignalHandler(int signal_number) {
+  struct sigaction sig_action;
+  memset(&sig_action, 0, sizeof(sig_action));
+  sigemptyset(&sig_action.sa_mask);
+  sig_action.sa_handler = SIG_DFL;
+  sigaction(signal_number, &sig_action, nullptr);
+  kill(getpid(), signal_number);
+  return 0;
+}
+
 void failureSignalHandler(int signal_number, siginfo_t* signal_info,
                           void* context) {
   StackTrace st;
   auto stack_trace_info = st.GetStackTrace();
   std::cerr << stack_trace_info << std::endl;
+  invokeDefaultSignalHandler(signal_number);
 }
 
 StackTrace::StackTrace() {}
