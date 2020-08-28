@@ -9,6 +9,7 @@
 
 namespace kingfisher {
 namespace dump {
+namespace detail {
 
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(a) (sizeof(a) / sizeof(*(a)))
@@ -26,6 +27,19 @@ const struct {
     {SIGSEGV, "SIGSEGV"}, {SIGILL, "SIGILL"},   {SIGFPE, "SIGFPE"},
     {SIGABRT, "SIGABRT"}, {SIGTERM, "SIGTERM"},
 };
+
+class MinimalFormatter {
+ public:
+  MinimalFormatter(char* buffer, int size)
+      : buffer_(buffer), cursor_(buffer), end_(buffer + size) {}
+
+ private:
+  char* buffer_;
+  char* cursor_;
+  const char* const end_;
+};
+
+}  // namespace detail
 
 int invokeDefaultSignalHandler(int signal_number);
 void failureSignalHandler(int signal_number, siginfo_t* signal_info,
@@ -54,14 +68,16 @@ StackTrace::StackTrace() {}
 StackTrace::~StackTrace() {}
 
 int StackTrace::InstallFailureSignalHandler() {
+  using namespace detail;
   struct sigaction sig_action;
   memset(&sig_action, 0, sizeof(sig_action));
   sigemptyset(&sig_action.sa_mask);
   sig_action.sa_flags |= SA_SIGINFO;
   sig_action.sa_sigaction = failureSignalHandler;
 
-  for (size_t i = 0; i < ARRAYSIZE(kFailureSignals); ++i) {
-    int ret = sigaction(kFailureSignals[i].signal_number, &sig_action, nullptr);
+  for (size_t i = 0; i < ARRAYSIZE(detail::kFailureSignals); ++i) {
+    int ret = sigaction(detail::kFailureSignals[i].signal_number, &sig_action,
+                        nullptr);
     if (0 != ret) {
       return ret;
     }
@@ -74,12 +90,12 @@ void StackTrace::demangleSymbol(std::string& symbol) {
   std::string::size_type from_pos = 0;
   while (from_pos < symbol.size()) {
     std::string::size_type mangled_start =
-        symbol.find(kMangledSymbolPrefix, from_pos);
+        symbol.find(detail::kMangledSymbolPrefix, from_pos);
     if (mangled_start == std::string::npos) {
       break;
     }
     std::string::size_type mangled_end =
-        symbol.find_first_not_of(kSymbolCharacters, mangled_start);
+        symbol.find_first_not_of(detail::kSymbolCharacters, mangled_start);
     if (mangled_end == std::string::npos) {
       mangled_end = symbol.size();
     }
