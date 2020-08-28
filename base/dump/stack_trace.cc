@@ -1,20 +1,58 @@
 #include "stack_trace.h"
 #include <cxxabi.h>
 #include <execinfo.h>  // backtrace and backtrace_symbols func
+#include <signal.h>
 #include <string.h>
+#include <iostream>
 #include <memory>
 
 namespace kingfisher {
 namespace dump {
+
+#ifndef ARRAYSIZE
+#define ARRAYSIZE(a) (sizeof(a) / sizeof(*(a)))
+#endif
 
 const char kMangledSymbolPrefix[] = "_Z";
 
 const char kSymbolCharacters[] =
     "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
 
+const struct {
+  int signal_number;
+  const char* name;
+} kFailureSignals[] = {
+    {SIGSEGV, "SIGSEGV"}, {SIGILL, "SIGILL"},   {SIGFPE, "SIGFPE"},
+    {SIGABRT, "SIGABRT"}, {SIGTERM, "SIGTERM"},
+};
+
+void failureSignalHandler(int signal_number, siginfo_t* signal_info,
+                          void* context) {
+  StackTrace st;
+  auto stack_trace_info = st.GetStackTrace();
+  std::cerr << stack_trace_info << std::endl;
+}
+
 StackTrace::StackTrace() {}
 
 StackTrace::~StackTrace() {}
+
+int StackTrace::InstallFailureSignalHandler() {
+  struct sigaction sig_action;
+  memset(&sig_action, 0, sizeof(sig_action));
+  sigemptyset(&sig_action.sa_mask);
+  sig_action.sa_flags |= SA_SIGINFO;
+  sig_action.sa_sigaction = failureSignalHandler;
+
+  for (size_t i = 0; i < ARRAYSIZE(kFailureSignals); ++i) {
+    int ret = sigaction(kFailureSignals[i].signal_number, &sig_action, nullptr);
+    if (0 != ret) {
+      return ret;
+    }
+  }
+
+  return 0;
+}
 
 void StackTrace::demangleSymbol(std::string& symbol) {
   std::string::size_type from_pos = 0;

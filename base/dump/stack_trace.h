@@ -14,11 +14,11 @@ class StackTrace {
   StackTrace();
   ~StackTrace();
 
+  static int InstallFailureSignalHandler();
   const char* GetStackTrace();
 
  private:
   void demangleSymbol(std::string& symbol);
-  // void processStackTrack();
 
  private:
   std::string stack_;
