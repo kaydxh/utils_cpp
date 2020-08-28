@@ -18,6 +18,7 @@ class test_BlockingQueue : public testing::Test {
 
 TEST_F(test_BlockingQueue, Integer) {
   kingfisher::thread::BlockingQueue<int> q;
+
   auto t1 = std::async(std::launch::async, [&q]() {
     for (int i = 0; i < 10; ++i) {
       q.Put(i);
@@ -39,4 +40,20 @@ TEST_F(test_BlockingQueue, Integer) {
   t1.wait();
   t2.wait();
   t3.wait();
+
+#if 0
+  for (int i = 0; i < 10; ++i) {
+    q.Put(i);
+    std::cout << "put " << i << std::endl;
+  }
+
+  std::thread t([&]() {
+    for (int i = 0; i < 10; ++i) {
+      auto v = q.Take();
+      std::cout << "take " << v << std::endl;
+    }
+  });
+
+  t.join();
+#endif
 }
