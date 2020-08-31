@@ -25,6 +25,8 @@ set(CXX_FLAGS
  -rdynamic
  )
 
+# generate compile_commands.json
+set (CMAKE_EXPORT_COMPILE_COMMANDS "ON")
 set (CMAKE_CXX_COMPILER "g++")
 set (CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb -D__STDC_FORMAT_MACROS -fprofile-arcs -ftest-coverage -fPIC")
 set (CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O2 -finline-limit=1000 -DNDEBUG -D__STDC_FORMAT_MACROS")
