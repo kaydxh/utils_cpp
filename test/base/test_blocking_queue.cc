@@ -40,20 +40,22 @@ TEST_F(test_BlockingQueue, Integer) {
   t1.wait();
   t2.wait();
   t3.wait();
+}
 
-#if 0
+TEST_F(test_BlockingQueue, Timeout) {
+  kingfisher::thread::BlockingQueue<int> q;
+
   for (int i = 0; i < 10; ++i) {
     q.Put(i);
     std::cout << "put " << i << std::endl;
   }
 
   std::thread t([&]() {
-    for (int i = 0; i < 10; ++i) {
-      auto v = q.Take();
+    for (int i = 0; i < 11; ++i) {
+      auto v = q.TakeWait(3000);
       std::cout << "take " << v << std::endl;
     }
   });
 
   t.join();
-#endif
 }
