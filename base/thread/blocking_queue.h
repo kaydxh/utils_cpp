@@ -48,20 +48,21 @@ class BlockingQueue : noncopyable {
     return front;
   }
 
-  T TakeWait(int32_t tm) {
+  T TakeWait(bool &return_, int32_t tm) {
     std::unique_lock<std::mutex> lock(mutex_);
     std::chrono::milliseconds timout(tm);
     while (queue_.empty()) {
       bool ret =
           cond_.wait_for(lock, timout, [this] { return !queue_.empty(); });
       if (!ret) {
+        return_ = false;
         return T();
       }
     }
     assert(!queue_.empty());
     T front(std::move(queue_.front()));
     queue_.pop_front();
-
+    return_ = true;
     return front;
   }
 
