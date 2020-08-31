@@ -43,17 +43,24 @@ TEST_F(test_BlockingQueue, Integer) {
 }
 
 TEST_F(test_BlockingQueue, Timeout) {
-  kingfisher::thread::BlockingQueue<int> q;
+  kingfisher::thread::BlockingQueue<const char*> q;
+
+  const char* num_addrs[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
 
   for (int i = 0; i < 10; ++i) {
-    q.Put(i);
-    std::cout << "put " << i << std::endl;
+    q.Put(num_addrs[i]);
+    std::cout << "put " << num_addrs[i] << std::endl;
   }
 
   std::thread t([&]() {
     for (int i = 0; i < 11; ++i) {
-      auto v = q.TakeWait(3000);
-      std::cout << "take " << v << std::endl;
+      bool result = false;
+      const char* v = q.TakeWait(result, 3000);
+      if (result) {
+        std::cout << "take " << v << std::endl;
+      } else {
+        std::cout << "take timeout" << std::endl;
+      }
     }
   });
 
