@@ -54,9 +54,9 @@ TEST_F(test_BlockingQueue, Timeout) {
 
   std::thread t([&]() {
     for (int i = 0; i < 11; ++i) {
-      bool result = false;
+      int result = -1;
       const char* v = q.TakeWait(result, 3000);
-      if (result) {
+      if (0 == result) {
         std::cout << "take " << v << std::endl;
       } else {
         std::cout << "take timeout" << std::endl;
