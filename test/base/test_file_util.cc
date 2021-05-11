@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
+
 #include <iostream>
+
 #include "core/scope_guard.h"
 #include "file/file.h"
 
@@ -16,9 +18,11 @@ class test_FileUtil : public testing::Test {
   virtual void TearDown(void) {}
 };
 
-TEST_F(test_FileUtil, All) {
+TEST_F(test_FileUtil, CopyFile) {
   EXPECT_TRUE(CopyFile("/etc/hosts", "./hosts"));
   EXPECT_FALSE(CopyFile("/etc/host", "./host"));
-
-  EXPECT_TRUE(DeleteFile("./hosts"));
 }
+
+TEST_F(test_FileUtil, DeleteFile) { EXPECT_TRUE(DeleteFile("./hosts")); }
+
+TEST_F(test_FileUtil, IsDir) { EXPECT_TRUE(IsDir("/etc")); }
