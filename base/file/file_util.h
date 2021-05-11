@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <unistd.h>
+
 #include <cerrno>
 #include <iostream>
 
@@ -64,6 +65,8 @@ ssize_t ReadFull(int fd, void *buf, size_t length);
 ssize_t WriteFull(int fd, const void *buf, size_t length);
 
 bool CopyFile(const char *from_path, const char *to_path);
+
+bool IsDir(const std::string &path);
 
 bool DeleteFile(const char *filename);
 

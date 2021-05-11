@@ -1,5 +1,7 @@
 #include "file_util.h"
+
 #include <sys/file.h>
+#include <sys/stat.h>
 
 #include "core/scope_guard.h"
 
@@ -55,6 +57,11 @@ bool CopyFile(const char *from_path, const char *to_path) {
   }
 
   return true;
+}
+
+bool IsDir(const std::string &path) {
+  struct stat buf;
+  return stat(path.c_str(), &buf) == 0 && S_ISDIR(buf.st_mode);
 }
 
 bool DeleteFile(const char *filename) {
