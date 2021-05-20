@@ -5,6 +5,7 @@ set (
   file/file.cc
   file/file_util.cc
   hash/md5.cc
+  os/getwd.cc
   serializer/djson.cc
   thread/thread.cc
   thread/thread_pool.cc
