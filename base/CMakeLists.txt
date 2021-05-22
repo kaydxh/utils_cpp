@@ -10,6 +10,7 @@ set (
   thread/thread.cc
   thread/thread_pool.cc
   time/date.cc
+  time/time_counter.cc
   time/timestamp.cc
   time/time_zone.cc
   uuid/guid.cc
