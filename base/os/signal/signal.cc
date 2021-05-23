@@ -7,9 +7,12 @@
 
 #include <cerrno>
 #include <csignal>
+#include <iostream>
 
 namespace kingfisher {
 namespace os {
+
+std::unordered_map<int, std::function<void(int)>> SignalHandler::sigHandlers_;
 
 SignalHandler::SignalHandler() {}
 SignalHandler::~SignalHandler() {}
@@ -23,8 +26,9 @@ void SignalHandler::exitHandler(int signum) {
   }
 #endif
 
-  auto it = sigHandlers_.find(signum);
-  if (it != sigHandlers_.end()) {
+  std::cout << "exit handler for signal: " << signum << std::endl;
+  auto it = SignalHandler::sigHandlers_.find(signum);
+  if (it != SignalHandler::sigHandlers_.end()) {
     it->second(signum);
   }
 }
@@ -32,6 +36,7 @@ void SignalHandler::exitHandler(int signum) {
 void SignalHandler::registerHandler(int signum,
                                     const std::function<void(int)>& handler) {
   // std::lock_guard<std::timed_mutex> lock(sigMutex_);
+  std::cout << "register hanlder for signum: " << signum << std::endl;
   sigHandlers_.emplace(signum, handler);
 }
 
@@ -41,7 +46,7 @@ int SignalHandler::SetSignal(int signum, const std::function<void(int)>& cb) {
   sa.sa_handler = &SignalHandler::exitHandler;
   sigemptyset(&sa.sa_mask);
   sa.sa_flags |= SA_RESETHAND;
-  if (sigaction(signum, nullptr, &sa) == -1) {
+  if (sigaction(signum, &sa, nullptr) == -1) {
     return errno;
   }
 

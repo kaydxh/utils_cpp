@@ -13,12 +13,13 @@ class SignalHandler {
   SignalHandler();
   ~SignalHandler();
 
-  int SetSignal(int signum, const std::function<void(int)>& cb);
-  int SetCoreDump(bool effect, int coreFileSize);
+  static int SetSignal(int signum, const std::function<void(int)>& cb);
+  static int SetCoreDump(bool effect, int coreFileSize);
 
  private:
   static void exitHandler(int signum);
-  void registerHandler(int signum, const std::function<void(int)>& handler);
+  static void registerHandler(int signum,
+                              const std::function<void(int)>& handler);
 
  private:
   static std::timed_mutex sigMutex_;
