@@ -1,5 +1,7 @@
 #include "file_util.h"
 
+#include <libgen.h>
+#include <string.h>
 #include <sys/file.h>
 #include <sys/stat.h>
 
@@ -10,6 +12,12 @@ namespace fileutil {
 
 int Open(const char *filename, int flags /* = O_RDWR | O_LARGEFILE | O_CREAT*/,
          mode_t mode /* = 0666 */) {
+  std::string dir = Dir(filename);
+  int ret = MakeDirAll(dir);
+  if (ret != 0) {
+    return ret;
+  }
+
   return detail::WrapFuncT(open, filename, flags, mode);
 }
 
@@ -19,6 +27,28 @@ ssize_t ReadFull(int fd, void *buf, size_t length) {
 
 ssize_t WriteFull(int fd, const void *buf, size_t length) {
   return detail::WrapFileOpFuncT(write, fd, const_cast<void *>(buf), length);
+}
+
+ssize_t WriteFile(const std::string &filename, const std::string &content,
+                  bool apppended) {
+  int fd = -1;
+  if (apppended) {
+    fd = Open(filename.c_str(), O_CREAT | O_RDWR | O_APPEND);
+  } else {
+    fd = Open(filename.c_str(), O_CREAT | O_RDWR | O_TRUNC);
+  }
+  if (-1 == fd) {
+    return 0;
+  }
+
+  SCOPE_EXIT {
+    if (fd != -1) {
+      std::cout << "close fd: " << fd << std::endl;
+      close(fd);
+    }
+  };
+
+  return WriteFull(fd, content.c_str(), content.length());
 }
 
 bool CopyFile(const char *from_path, const char *to_path) {
@@ -57,6 +87,41 @@ bool CopyFile(const char *from_path, const char *to_path) {
   }
 
   return true;
+}
+
+std::string Dir(const std::string &filename) {
+  char *dirc = strdup(filename.c_str());
+  char *dir = dirname(dirc);
+  if (dir != nullptr) {
+    return std::string(dir);
+  }
+
+  return "";
+}
+
+int MakeDirAll(const std::string &path) {
+  if (IsDir(path)) {
+    return 0;
+  }
+
+  int i = path.length();
+  for (; i > 0 && path[i - 1] == '/';) {
+    i--;
+  }
+
+  int j = i;
+  for (; j > 0 && path[j - 1] != '/';) {
+    j--;
+  }
+
+  if (j > 1) {
+    int ret = MakeDirAll(path.substr(0, j - 1));
+    if (ret != 0) {
+      return ret;
+    }
+  }
+
+  return ::mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 }
 
 bool IsDir(const std::string &path) {

@@ -64,7 +64,14 @@ ssize_t ReadFull(int fd, void *buf, size_t length);
 
 ssize_t WriteFull(int fd, const void *buf, size_t length);
 
+ssize_t WriteFile(const std::string &filename, const std::string &content,
+                  bool apppended);
+
 bool CopyFile(const char *from_path, const char *to_path);
+
+std::string Dir(const std::string &filename);
+
+int MakeDirAll(const std::string &dir);
 
 bool IsDir(const std::string &path);
 
