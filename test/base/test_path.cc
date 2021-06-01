@@ -29,6 +29,12 @@ TEST_F(test_Path, IsAbs) {
   ASSERT_FALSE(IsAbs(filepath));
 }
 
+TEST_F(test_Path, Dir) {
+  std::string filepath = "/data/home/image/1.jpg";
+  std::string dir = Dir(filepath);
+  ASSERT_TRUE(dir == "/data/home/image/");
+}
+
 TEST_F(test_Path, Split) {
   std::string filepath = "/data/home/image/1.jpg";
   std::string dir;
@@ -39,3 +45,4 @@ TEST_F(test_Path, Split) {
   ASSERT_TRUE(filename == "1.jpg");
   std::cout << "dir: " << dir << ", file:" << filename << std::endl;
 }
+
