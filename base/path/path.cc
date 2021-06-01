@@ -16,7 +16,15 @@ bool IsAbs(const std::string &path) {
   return path.length() > 0 && path[0] == '/';
 }
 
-std::string Dir(const std::string &path) { return ""; }
+std::string Dir(const std::string &path) {
+  std::string dir;
+  std::string filename;
+  auto ret = Split(path, dir, filename);
+  if (ret != 0) {
+    return "";
+  }
+  return dir;
+}
 
 int Split(const std::string &path, std::string &dir_return_,
           std::string &file_return_) {
