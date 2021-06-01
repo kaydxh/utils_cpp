@@ -7,7 +7,9 @@ set (
   hash/md5.cc
   os/getwd.cc
   os/signal/signal.cc
+  path/path.cc
   serializer/djson.cc
+  strings/strings.cc
   thread/thread.cc
   thread/thread_pool.cc
   time/date.cc
