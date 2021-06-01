@@ -10,6 +10,11 @@ std::string Abs(const std::string &path);
 
 bool IsAbs(const std::string &path);
 
+std::string Dir(const std::string &path);
+
+int Split(const std::string &path, std::string &dir_return_,
+          std::string &file_return_);
+
 }  // namespace path
 }  // namespace kingfisher
 
