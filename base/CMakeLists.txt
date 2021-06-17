@@ -24,4 +24,25 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/hash)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/serializer)
 
 add_library(kingfisher_base ${base_SRC})
-install(TARGETS kingfisher_base DESTINATION lib)
+file(GLOB_RECURSE ALLEGRO_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/*.h")
+# message(STATUS "current dir = ${CMAKE_CURRENT_SOURCE_DIR}, include files =  ${ALLEGRO_INCLUDE_DIR}")
+
+#set_target_properties(kingfisher_base PROPERTIES PUBLIC_HEADER "${ALLEGRO_INCLUDE_DIR}")
+
+message(STATUS "dir= ${CMAKE_CURRENT_BINARY_DIR}")
+#install(TARGETS kingfisher_base DESTINATION lib)
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/
+        DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/../output/include
+        FILES_MATCHING
+        PATTERN "*.h"
+        PATTERN "*.hpp"
+        )
+
+install(TARGETS kingfisher_base DESTINATION output/lib)
+
+#INSTALL(TARGETS kingfisher_base 
+#        LIBRARY DESTINATION lib 
+        #        PUBLIC_HEADER DESTINATION include
+        #)
+

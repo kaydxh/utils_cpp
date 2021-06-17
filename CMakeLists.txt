@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 2.8.1)
+cmake_minimum_required (VERSION 3.18.1)
 
 project (kingfisher CXX)
 
@@ -35,6 +35,7 @@ string(REPLACE ";" " " CMAKE_CXX_FLAGS "${CXX_FLAGS}")
 set (CMAKE_INSTALL_PREFIX ${PROJECT_BINARY_DIR})
 set (EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 set (LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+#set_target_properties(kingfisher_base PROPERTIES PUBLIC_HEADER "*.h")
 
 string (TOUPPER ${CMAKE_BUILD_TYPE} BUILD_TYPE)
 message(STATUS "CXX_FLAGS = " ${CMAKE_CXX_FLAGS} " " ${CMAKE_CXX_FLAGS_${BUILD_TYPE}})
@@ -47,3 +48,8 @@ add_subdirectory (base)
 
 LINK_DIRECTORIES(${CMAKE_INSTALL_PREFIX}/lib)
 add_subdirectory (test/base)
+
+#INSTALL(TARGETS kingfisher_base 
+#        LIBRARY DESTINATION ${LIBRARY_OUTPUT_PATH}
+#        PUBLIC_HEADER DESTINATION ${PROJECT_BINARY_DIR}/include
+#)
