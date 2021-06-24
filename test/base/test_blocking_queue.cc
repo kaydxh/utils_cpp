@@ -2,8 +2,10 @@
 // Created by kayxhding on 2020-04-25 18:45:24
 //
 #include <gtest/gtest.h>
+
 #include <future>
 #include <iostream>
+
 #include "thread/blocking_queue.h"
 
 class test_BlockingQueue : public testing::Test {
@@ -42,7 +44,7 @@ TEST_F(test_BlockingQueue, Integer) {
   t3.wait();
 }
 
-TEST_F(test_BlockingQueue, Timeout) {
+TEST_F(test_BlockingQueue, TakeWait) {
   kingfisher::thread::BlockingQueue<const char*> q;
 
   const char* num_addrs[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
@@ -65,4 +67,20 @@ TEST_F(test_BlockingQueue, Timeout) {
   });
 
   t.join();
+}
+
+TEST_F(test_BlockingQueue, PutWait) {
+  kingfisher::thread::BlockingQueue<const char*> q(5);
+
+  const char* num_addrs[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"};
+
+  for (int i = 0; i < 10; ++i) {
+    int result = -1;
+    q.PutWait(result, num_addrs[i], 3000);
+    if (0 == result) {
+      std::cout << "put " << num_addrs[i] << std::endl;
+    } else {
+      std::cout << "put " << num_addrs[i] << " timeout" << std::endl;
+    }
+  }
 }
