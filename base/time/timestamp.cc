@@ -1,5 +1,8 @@
 #include "timestamp.h"
+
 #include <stdio.h>
+
+#include <chrono>
 #include <type_traits>  // for static_assert
 
 namespace kingfisher {

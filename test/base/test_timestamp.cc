@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
+
 #include <iostream>
+
 #include "time/timestamp.h"
 using namespace kingfisher;
 using namespace kingfisher::time;
@@ -36,13 +38,14 @@ TEST(test_Timestamp, All) {
   ASSERT_TRUE(tt.ToSecDotMicroString() == ts.ToSecDotMicroString());
 
   ASSERT_FALSE(ts < tt);
-  std::cout << DiffTimerence(ts, tt) << std::endl;
-  ASSERT_TRUE(0 == DiffTimerence(ts, tt));
+  ASSERT_TRUE(0 == DiffTimerenceSecond(ts, tt));
 
   Timestamp add_time = Timestamp::Invalid();
   add_time = AddTime(ts, 1000.0);
   std::cout << add_time.ToString() << std::endl;
   std::cout << add_time.ToFormattedString() << std::endl;
 
-  ASSERT_TRUE(1000.0 == DiffTimerence(add_time, tt));
+  std::cout << "diff (ts-tt) time: " << DiffTimerenceMilliSecond(add_time, tt)
+            << "ms" << std::endl;
+  ASSERT_TRUE(1000.0 == DiffTimerenceSecond(add_time, tt));
 }

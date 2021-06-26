@@ -7,6 +7,7 @@
 
 #include <inttypes.h>
 #include <sys/time.h>
+
 #include <string>
 
 namespace kingfisher {
@@ -44,6 +45,7 @@ class Timestamp {
   static Timestamp Invalid();
 
   static const int kMicroSecondsPerSecond = 1000 * 1000;
+  static const int kMicroSecondsPerMilliSecond = 1000;
 
  private:
   int64_t micro_seconds_since_epoch_;
@@ -65,9 +67,15 @@ inline bool operator>(const Timestamp &lhs, const Timestamp &rhs) {
   return !(lhs < rhs) && (lhs != rhs);
 }
 
-inline double DiffTimerence(const Timestamp &high, const Timestamp &low) {
+inline double DiffTimerenceSecond(const Timestamp &high, const Timestamp &low) {
   int64_t diff = high.MicroSecondsSinceEpoch() - low.MicroSecondsSinceEpoch();
   return static_cast<double>(diff) / Timestamp::kMicroSecondsPerSecond;
+}
+
+inline double DiffTimerenceMilliSecond(const Timestamp &high,
+                                       const Timestamp &low) {
+  int64_t diff = high.MicroSecondsSinceEpoch() - low.MicroSecondsSinceEpoch();
+  return static_cast<double>(diff) / Timestamp::kMicroSecondsPerMilliSecond;
 }
 
 inline Timestamp AddTime(const Timestamp &timestamp, double seconds) {
