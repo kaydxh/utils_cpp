@@ -12,11 +12,13 @@
 #include <iostream>
 #include <mutex>
 
+#include "core/noncopyable.hpp"
+
 namespace kingfisher {
 namespace thread {
 
 template <typename T>
-class BlockingQueue {
+class BlockingQueue : noncopyable {
   using LockGuard = std::lock_guard<std::mutex>;
 
  public:
