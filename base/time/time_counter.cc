@@ -28,8 +28,8 @@ std::string TimeCounter::String() {
   auto f = [&](int idx, std::string msg, double cost,
                std::string at) -> std::string {
     char buf[1024];
-    snprintf(buf, sizeof(buf), "#%d, msg: %s, cost: %f, at %s\n", idx,
-             msg.c_str(), cost, at.c_str());
+    snprintf(buf, sizeof(buf), "#%d, msg: %s, cost: %fms, at %s\n", idx,
+             msg.c_str(), cost * 1000, at.c_str());
     return std::string(buf);
   };
 
