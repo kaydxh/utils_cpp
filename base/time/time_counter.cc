@@ -29,7 +29,7 @@ std::string TimeCounter::String() {
                std::string at) -> std::string {
     char buf[1024];
     snprintf(buf, sizeof(buf), "#%d, msg: %s, cost: %fms, at %s\n", idx,
-             msg.c_str(), cost * 1000, at.c_str());
+             msg.c_str(), cost, at.c_str());
     return std::string(buf);
   };
 
@@ -49,8 +49,9 @@ std::string TimeCounter::summary(
 
   std::string result;
   for (std::vector<Timestamp>::size_type i = 1; i < starts_.size(); ++i) {
-    result += f(i, messages_[i], DiffTimerence(starts_[i], starts_[i - 1]),
-                starts_[i].ToFormattedString());
+    result +=
+        f(i, messages_[i], DiffTimerenceMilliSecond(starts_[i], starts_[i - 1]),
+          starts_[i].ToFormattedString());
   }
 
   return result;
