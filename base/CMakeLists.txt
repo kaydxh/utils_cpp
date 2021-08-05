@@ -5,6 +5,7 @@ set (
   file/file.cc
   file/file_util.cc
   hash/md5.cc
+  net/ip.cc
   os/getwd.cc
   os/signal/signal.cc
   path/path.cc
