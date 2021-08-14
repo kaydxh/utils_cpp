@@ -17,6 +17,21 @@ class test_Strings : public testing::Test {
   virtual void TearDown(void) {}
 };
 
+TEST_F(test_Strings, IsNumber) {
+  struct TestCases {
+    std::string str;
+    bool expected;
+  };
+
+  std::vector<TestCases> testCases = {{"123", true}, {"12a", false}};
+
+  for (auto testCase : testCases) {
+    auto isNum = IsNumber(testCase.str);
+    std::cout << "isNum: " << isNum << std::endl;
+    ASSERT_TRUE(isNum == testCase.expected);
+  }
+}
+
 TEST_F(test_Strings, All) {
   std::string filepath = "./tmp/test";
   std::vector<std::string> path_nodes = Split(filepath, '/');
