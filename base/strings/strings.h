@@ -8,8 +8,9 @@
 namespace kingfisher {
 namespace strings {
 
+bool IsNumber(const std::string &s);
 std::vector<std::string> Split(const std::string &s, const char delim);
 
-}
+}  // namespace strings
 }  // namespace kingfisher
 #endif
