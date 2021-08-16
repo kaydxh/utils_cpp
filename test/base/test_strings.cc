@@ -32,6 +32,23 @@ TEST_F(test_Strings, IsNumber) {
   }
 }
 
+TEST_F(test_Strings, ParseInt64) {
+  struct TestCases {
+    std::string str;
+    int64_t expected;
+  };
+
+  std::vector<TestCases> testCases = {{"123", 123}, {"-123", -123}};
+
+  for (auto testCase : testCases) {
+    int64_t result;
+    auto ret = ParseInt64(result, testCase.str);
+    ASSERT_TRUE(ret == 0);
+    std::cout << "result of ParseInt64: " << result << std::endl;
+    ASSERT_TRUE(result == testCase.expected);
+  }
+}
+
 TEST_F(test_Strings, All) {
   std::string filepath = "./tmp/test";
   std::vector<std::string> path_nodes = Split(filepath, '/');
