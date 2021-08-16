@@ -53,17 +53,38 @@ TEST_F(test_Strings, HasPrefix) {
   struct TestCases {
     std::string str;
     std::string prefix;
-    int64_t expected;
+    bool caseSenstitive;
+    bool expected;
   };
 
-  std::vector<TestCases> testCases = {{"abcde", "ab", true},
-                                      {"abce", "abced", false}};
+  std::vector<TestCases> testCases = {{"abcde", "ab", true, true},
+                                      {"abce", "abced", true, false},
+                                      {"abce", "AB", true, false},
+                                      {"abce", "AB", false, true}};
 
   for (auto testCase : testCases) {
-    auto has = HasPrefix(testCase.str, testCase.prefix);
+    auto has =
+        HasPrefix(testCase.str, testCase.prefix, testCase.caseSenstitive);
     ASSERT_TRUE(has == testCase.expected);
     std::cout << "result of HasPrefix: " << has << std::endl;
     ASSERT_TRUE(has == testCase.expected);
+  }
+}
+
+TEST_F(test_Strings, TrimLeft) {
+  struct TestCases {
+    std::string str;
+    std::string prefix;
+    std::string expected;
+  };
+
+  std::vector<TestCases> testCases = {{"aabbcc", "aa", "bbcc"},
+                                      {"aabbcc", "a", "bbcc"}};
+
+  for (auto testCase : testCases) {
+    auto result = TrimLeft(testCase.str, testCase.prefix);
+    std::cout << "result of TrimLeft: " << result << std::endl;
+    ASSERT_TRUE(result == testCase.expected);
   }
 }
 
