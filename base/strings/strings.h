@@ -9,6 +9,9 @@ namespace kingfisher {
 namespace strings {
 
 bool IsNumber(const std::string &s);
+
+int ParseInt(int &result, const std::string &s, int base = 10);
+
 std::vector<std::string> Split(const std::string &s, const char delim);
 
 }  // namespace strings

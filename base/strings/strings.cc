@@ -17,6 +17,15 @@ bool IsNumber(const std::string &s) {
   return true;
 }
 
+int ParseInt64(int64_t &result, const std::string &s, int base) {
+  if (!IsNumber(s)) {
+    return -1;
+  }
+
+  result = std::stoll(s);
+  return 0;
+}
+
 std::vector<std::string> Split(const std::string &s, const char delim) {
   std::string word;
   std::stringstream ss(s);
