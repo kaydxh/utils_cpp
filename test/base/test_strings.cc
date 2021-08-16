@@ -49,6 +49,24 @@ TEST_F(test_Strings, ParseInt64) {
   }
 }
 
+TEST_F(test_Strings, HasPrefix) {
+  struct TestCases {
+    std::string str;
+    std::string prefix;
+    int64_t expected;
+  };
+
+  std::vector<TestCases> testCases = {{"abcde", "ab", true},
+                                      {"abce", "abced", false}};
+
+  for (auto testCase : testCases) {
+    auto has = HasPrefix(testCase.str, testCase.prefix);
+    ASSERT_TRUE(has == testCase.expected);
+    std::cout << "result of HasPrefix: " << has << std::endl;
+    ASSERT_TRUE(has == testCase.expected);
+  }
+}
+
 TEST_F(test_Strings, All) {
   std::string filepath = "./tmp/test";
   std::vector<std::string> path_nodes = Split(filepath, '/');

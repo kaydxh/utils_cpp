@@ -55,5 +55,15 @@ std::vector<std::string> Split(const std::string &s, const char delim) {
   return words;
 }
 
+bool HasPrefix(const std::string &s, const std::string &prefix,
+               bool case_sensitive) {
+  if (s.length() < prefix.length()) {
+    return false;
+  }
+
+  auto pos = s.find(prefix);
+  return 0 == pos;
+}
+
 }  // namespace strings
 }  // namespace kingfisher
