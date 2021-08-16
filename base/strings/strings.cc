@@ -8,8 +8,17 @@ namespace kingfisher {
 namespace strings {
 
 bool IsNumber(const std::string &s) {
-  for (char const &c : s) {
-    if (!std::isdigit(c)) {
+  if (s.empty()) {
+    return false;
+  }
+
+  for (size_t i = 0; i < s.length(); ++i) {
+    if (!std::isdigit(s[i])) {
+      if (i == 0 && s.length() > 1) {
+        if (s[i] == '-' || s[i] == '+') {
+          continue;
+        }
+      }
       return false;
     }
   }
@@ -23,6 +32,15 @@ int ParseInt64(int64_t &result, const std::string &s, int base) {
   }
 
   result = std::stoll(s);
+  return 0;
+}
+
+int ParseUint64(uint64_t &result, const std::string &s, int base) {
+  if (!IsNumber(s)) {
+    return -1;
+  }
+
+  result = std::stoull(s);
   return 0;
 }
 

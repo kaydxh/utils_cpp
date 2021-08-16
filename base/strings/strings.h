@@ -10,7 +10,9 @@ namespace strings {
 
 bool IsNumber(const std::string &s);
 
-int ParseInt(int &result, const std::string &s, int base = 10);
+int ParseInt64(int64_t &result, const std::string &s, int base = 10);
+
+int ParseUint64(uint64_t &result, const std::string &s, int base = 10);
 
 std::vector<std::string> Split(const std::string &s, const char delim);
 
