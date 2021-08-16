@@ -88,6 +88,23 @@ TEST_F(test_Strings, TrimLeft) {
   }
 }
 
+TEST_F(test_Strings, TrimRight) {
+  struct TestCases {
+    std::string str;
+    std::string suffix;
+    std::string expected;
+  };
+
+  std::vector<TestCases> testCases = {{"aabbcc", "cc", "aabb"},
+                                      {"aabbcc", "c", "aabb"}};
+
+  for (auto testCase : testCases) {
+    auto result = TrimRight(testCase.str, testCase.suffix);
+    std::cout << "result of TrimRight: " << result << std::endl;
+    ASSERT_TRUE(result == testCase.expected);
+  }
+}
+
 TEST_F(test_Strings, All) {
   std::string filepath = "./tmp/test";
   std::vector<std::string> path_nodes = Split(filepath, '/');
