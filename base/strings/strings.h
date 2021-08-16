@@ -18,6 +18,11 @@ std::vector<std::string> Split(const std::string &s, const char delim);
 
 bool HasPrefix(const std::string &s, const std::string &prefix,
                bool case_sensitive = true);
+bool HasSuffix(const std::string &s, const std::string &suffix,
+               bool case_sensitive = true);
+
+std::string ToLower(const std::string &s);
+std::string TrimLeft(const std::string &s, const std::string &prefix);
 
 }  // namespace strings
 }  // namespace kingfisher
