@@ -23,6 +23,7 @@ bool HasSuffix(const std::string &s, const std::string &suffix,
 
 std::string ToLower(const std::string &s);
 std::string TrimLeft(const std::string &s, const std::string &prefix);
+std::string TrimRight(const std::string &s, const std::string &suffix);
 
 }  // namespace strings
 }  // namespace kingfisher

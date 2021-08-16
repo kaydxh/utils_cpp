@@ -112,7 +112,14 @@ std::string ltrim(std::string s, ToTrim toTrim) {
 
 std::string TrimLeft(const std::string &s, const std::string &prefix) {
   if (HasPrefix(s, prefix)) {
-    return TrimLeft(s.substr(prefix.size()), prefix);
+    return TrimLeft(s.substr(prefix.length()), prefix);
+  }
+  return s;
+}
+
+std::string TrimRight(const std::string &s, const std::string &suffix) {
+  if (HasSuffix(s, suffix)) {
+    return TrimRight(s.substr(0, s.length() - suffix.length()), suffix);
   }
   return s;
 }
